@@ -27,22 +27,29 @@ PROMPTS = {
     }
 }
 
-try:
-    from config import OPENAI_API_KEY
-except ImportError:
-    OPENAI_API_KEY = None
-    print("Please create a config.py file with your OPENAI_API_KEY")
-    print("Example config.py contents:")
-    print('OPENAI_API_KEY = "your-api-key-here"')
-    exit(1)
-
 class StoryAnalyzer:
-    def __init__(self, api_key: str):
-        self.client = OpenAI(api_key=api_key)
+    def __init__(self, api_key: str = None):
+        self.api_key = api_key
+        self.client = None  # Initialize client only when needed
         self.results = []
         self.model = OPENAI_MODEL
     
+    def _ensure_client(self):
+        """Ensure OpenAI client is initialized with valid API key"""
+        if self.client is None:
+            if self.api_key is None:
+                try:
+                    from config import OPENAI_API_KEY
+                    self.api_key = OPENAI_API_KEY
+                except ImportError:
+                    print("Please create a config.py file with your OPENAI_API_KEY")
+                    print("Example config.py contents:")
+                    print('OPENAI_API_KEY = "your-api-key-here"')
+                    exit(1)
+            self.client = OpenAI(api_key=self.api_key)
+
     def generate_story(self, prompt: str) -> Optional[str]:
+        self._ensure_client()  # Only check for API key when making API calls
         try:
             response = self.client.chat.completions.create(
                 model=OPENAI_MODEL,
@@ -60,6 +67,7 @@ class StoryAnalyzer:
             return None
 
     def analyze_gender(self, story: str) -> Dict:
+        self._ensure_client()  # Only check for API key when making API calls
         try:
             prompt = """Analyze the following story paragraph and determine the gender of the MAIN character only.
 Return a JSON object with these fields:
@@ -254,7 +262,7 @@ if __name__ == "__main__":
     try:
         with open('story_analysis.json', 'r', encoding='utf-8') as f:
             print("\nFound existing data in story_analysis.json")
-            analyzer = StoryAnalyzer(OPENAI_API_KEY)
+            analyzer = StoryAnalyzer()  # No API key needed for loading existing data
             analyzer.results = json.load(f)
             model_used = analyzer.results[0].get('model', 'unknown model')
             print(f"Data was generated using: {model_used}")
@@ -264,6 +272,15 @@ if __name__ == "__main__":
             exit(0)
             
     except FileNotFoundError:
+        # Get API key only when we need to generate new stories
+        try:
+            from config import OPENAI_API_KEY
+        except ImportError:
+            print("Please create a config.py file with your OPENAI_API_KEY")
+            print("Example config.py contents:")
+            print('OPENAI_API_KEY = "your-api-key-here"')
+            exit(1)
+            
         # Get number of stories per prompt from user
         while True:
             try:
