@@ -571,11 +571,10 @@ def main():
     
     # Step 3: Get the number of responses per language
     print("\nRecommended sample sizes:")
-    print("- 1 sample per language (quick test) - 1 API call per language")
-    print("- 10 samples per language (moderate accuracy) - 10 API calls per language")
-    print("- 100 samples per language (good accuracy) - 100 API calls per language")
-    print("- 1000 samples per language (high accuracy) - 1000 API calls per language")
-    print("\nNote: Please check OpenAI's current pricing at https://openai.com/pricing before running large analyses.")
+    print("- 1 sample per language (quick test)")
+    print("- 10 samples per language (initial test for variance)")
+    print("- 100 samples per language (good accuracy)")
+    print("- 1000 samples per language (high accuracy)")
     
     samples_input = input("\nHow many responses would you like per language? (default: 10) ")
     
@@ -603,6 +602,7 @@ def main():
     print(f"- Responses per language: {samples}")
     print(f"- Total API calls: {total_api_calls}")
     print(f"- Estimated cost: ${estimated_cost:.2f}")
+    print("\nNote: Please check OpenAI's current pricing at https://openai.com/pricing before proceeding.")
     
     confirm = input("\nProceed with analysis? (y/n): ")
     if confirm.lower() != 'y':
