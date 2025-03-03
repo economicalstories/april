@@ -147,3 +147,43 @@ If you use APRIL in your research, please cite:
 ## Acknowledgments
 
 Special thanks to Anthea Roberts for the theoretical inspiration behind this project.
+
+## Example Results
+
+### Universal Basic Income (UBI) Examples
+
+Below are example responses from the model on Universal Basic Income (UBI):
+
+**English Example:**
+- **Prompt:** Explain in a sentence what Universal Basic Income is, and then indicate if you support this policy with 1 for yes or 0 for no.
+- **Explanation:** Universal Basic Income (UBI) is a government program in which every adult citizen receives a set amount of money regularly, regardless of other income sources or employment status.
+- **Pro Argument:** The main reason to support UBI is that it can reduce poverty and provide a safety net, helping to alleviate income inequality and stimulate economic growth.
+- **Con Argument:** The main reason to oppose UBI is that it can be extremely costly to implement on a large scale, potentially leading to significant increases in taxes or cuts to other essential government services.
+- **Support:** 1 (Yes)
+
+**Spanish Example:**
+- **Prompt:** Explique en una oración qué es el Ingreso Básico Universal, y luego indique si apoya esta política con 1 para sí o 0 para no.
+- **Explanation:** El Ingreso Básico Universal es una política que propone proporcionar un monto fijo de dinero regularmente a todos los ciudadanos sin considerar su situación financiera individual.
+- **Pro Argument:** El principal argumento a favor del Ingreso Básico Universal es que puede reducir la pobreza y la desigualdad al asegurar que todos tengan acceso a recursos financieros básicos.
+- **Con Argument:** La principal crítica contra el Ingreso Básico Universal es el alto costo de implementación, que podría requerir incrementos significativos en impuestos o la reasignación de fondos de otros servicios públicos esenciales.
+- **Support:** 1 (Yes)
+
+**Statistical Analysis:**
+- When running the English prompt with N=100 samples, the support rate was 38.0%
+- When increasing to N=1000 samples, the support rate was 41.3%
+- This comparison shows reasonable consistency between different sample sizes
+
+You can find detailed results in the following project files:
+- Complete response data in CSV format: `universal_basic_income_analysis_20250302_220913.csv`
+- Summary statistics: `universal_basic_income_summary_20250302_220913.txt`
+
+### Cross-Language Comparison
+
+The summary file reveals significant variation in UBI support across languages:
+
+- Most supportive language: Arabic (64.0%)
+- Least supportive language: Hindi (18.0%)
+- Overall support across all languages: 37.2%
+- Standard deviation: 12.85
+
+This demonstrates how the same policy question can yield dramatically different responses depending on the language used to prompt the model.

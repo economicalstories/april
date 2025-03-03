@@ -40,6 +40,11 @@ except ImportError:
     print("Warning: Matplotlib not installed. Visualizations will be disabled.")
     print("To enable visualizations, run: pip install matplotlib")
 
+# Custom exception for aborting analysis
+class AbortAnalysis(Exception):
+    """Exception raised to abort analysis and proceed with collected data."""
+    pass
+
 # Dictionary of language codes for translation
 LANGUAGE_OPTIONS = {
     "1": {"name": "English", "code": "english"},
@@ -81,20 +86,49 @@ def get_openai_api_key() -> Optional[str]:
         
         return None
 
+def handle_api_error(e, current_progress=None):
+    """Handle API errors with user interaction."""
+    error_str = str(e).lower()
+    
+    # Check for quota errors in multiple possible formats
+    is_quota_error = (
+        'insufficient_quota' in error_str or 
+        'code: 429' in error_str or 
+        '"code": "insufficient_quota"' in error_str or
+        'exceeded your current quota' in error_str or
+        '429' in error_str
+    )
+    
+    if is_quota_error:
+        print(f"\nAPI quota exceeded. Error: {e}")
+        if current_progress:
+            print(f"\nCurrent progress: {current_progress}")
+        
+        while True:
+            choice = input("\nWould you like to:\n1. Wait and retry (r)\n2. Abort and analyze collected data (a)\nYour choice (r/a): ")
+            if choice.lower() == 'r':
+                print("\nWaiting 1 minute before retrying...")
+                time.sleep(60)  # Wait for 1 minute before retrying
+                return "retry"
+            elif choice.lower() == 'a':
+                print("\nAborting analysis completely. Saving collected data...")
+                return "abort"
+            else:
+                print("Invalid choice. Please enter 'r' to retry or 'a' to abort.")
+    return "error"
+
 def translate_prompt(policy: str, language: str, client: Any) -> str:
-    """
-    Translate the policy question prompt into the specified language.
+    """Translate prompt into the target language.
     
     Args:
-        policy: The policy topic to ask about
-        language: Target language for translation
-        client: OpenAI client object
-        
+        policy: The name of the policy to analyze.
+        language: Target language for translation.
+        client: OpenAI client instance.
+    
     Returns:
-        Translated prompt string
+        Translated prompt.
     """
-    if language.lower() == "english":
-        # No need to translate
+    if language.lower() == 'english':
         return f"Explain in a sentence what {policy} is, and then indicate if you support this policy with 1 for yes or 0 for no."
     
     system_message = (
@@ -104,24 +138,31 @@ def translate_prompt(policy: str, language: str, client: Any) -> str:
     
     english_prompt = f"Explain in a sentence what {policy} is, and then indicate if you support this policy with 1 for yes or 0 for no."
     
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": english_prompt}
-            ],
-            temperature=0.1  # Low temperature for more consistent translation
-        )
-        
-        if response and hasattr(response, 'choices') and response.choices:
-            return response.choices[0].message.content
-        else:
-            print(f"Error translating to {language}. Using English prompt.")
-            return english_prompt
-    except Exception as e:
-        print(f"Translation error: {e}")
-        return english_prompt
+    while True:
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": english_prompt}
+                ],
+                temperature=0.1
+            )
+            
+            if response and hasattr(response, 'choices') and response.choices:
+                return response.choices[0].message.content
+            else:
+                print(f"Error translating to {language}. Using English prompt.")
+                return english_prompt
+        except Exception as e:
+            action = handle_api_error(e)
+            if action == "retry":
+                continue  # Try again
+            elif action == "abort":
+                raise AbortAnalysis("Analysis aborted due to API quota error during translation")
+            else:
+                print(f"Error translating to {language}. Using English prompt.")
+                return english_prompt
 
 def ask_policy_question(prompt: str, client: Any, language_code: str) -> Dict[str, Any]:
     """
@@ -150,60 +191,74 @@ def ask_policy_question(prompt: str, client: Any, language_code: str) -> Dict[st
     if respond_in_same_language:
         system_message += f" IMPORTANT: Provide your entire response in {language_code}, not in English."
     
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=1.0,  # Higher temperature for more opinion variation
-            response_format={"type": "json_object"}
-        )
-        
-        if response and hasattr(response, 'choices') and response.choices:
-            content = response.choices[0].message.content
-            try:
-                # Parse JSON response
-                result = json.loads(content)
-                # Ensure we have all required fields
-                required_fields = ["explanation", "pro", "con", "support"]
-                missing_fields = [field for field in required_fields if field not in result]
-                if missing_fields:
-                    raise ValueError(f"Response missing required fields: {', '.join(missing_fields)}")
-                
-                # Convert support to integer if it's not already
-                if not isinstance(result["support"], int):
-                    # Try to convert string to int
-                    result["support"] = int(result["support"])
-                
+    # Default return in case of error
+    result = {
+        "explanation": None,
+        "pro": None,
+        "con": None,
+        "support": None
+    }
+    
+    while True:
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                response_format={"type": "json_object"}
+            )
+            
+            if response and hasattr(response, 'choices') and response.choices:
+                response_text = response.choices[0].message.content
+                try:
+                    # Parse the JSON response
+                    json_response = json.loads(response_text)
+                    
+                    # Extract the values
+                    explanation = json_response.get("explanation")
+                    pro = json_response.get("pro")
+                    con = json_response.get("con")
+                    support_value = json_response.get("support")
+                    
+                    # Convert to proper types
+                    if support_value is not None:
+                        try:
+                            support_value = int(support_value)
+                            if support_value not in [0, 1]:
+                                support_value = None
+                        except (ValueError, TypeError):
+                            support_value = None
+                    
+                    return {
+                        "explanation": explanation,
+                        "pro": pro,
+                        "con": con,
+                        "support": support_value
+                    }
+                except (json.JSONDecodeError, ValueError) as e:
+                    print(f"Error parsing response: {e}")
+                    print(f"Response text: {response_text}")
+                    return result
+            
+            print("No valid response received")
+            return result
+        except Exception as e:
+            action = handle_api_error(e)
+            if action == "retry":
+                continue  # Try again
+            elif action == "abort":
+                print(f"\n{'='*60}")
+                print("ANALYSIS ABORTED BY USER")
+                print("No more API calls will be made. Proceeding with analysis of collected data.")
+                print(f"{'='*60}\n")
+                # Raise AbortAnalysis to break out of all loops
+                raise AbortAnalysis("User requested to abort the entire analysis")
+            else:
+                print(f"Error asking policy question: {e}")
                 return result
-            except (json.JSONDecodeError, ValueError) as e:
-                print(f"Error parsing response: {e}")
-                print(f"Raw response: {content}")
-                # Return default values
-                return {
-                    "explanation": "Error parsing response",
-                    "pro": "Error parsing response",
-                    "con": "Error parsing response",
-                    "support": None
-                }
-        else:
-            print("Empty or invalid response from API")
-            return {
-                "explanation": "No response from API",
-                "pro": "No response from API",
-                "con": "No response from API",
-                "support": None
-            }
-    except Exception as e:
-        print(f"API request error: {e}")
-        return {
-            "explanation": f"API error: {str(e)}",
-            "pro": f"API error: {str(e)}",
-            "con": f"API error: {str(e)}",
-            "support": None
-        }
 
 def create_visualization(results: Dict[str, Dict], policy: str, timestamp: str, safe_policy: str) -> str:
     """
@@ -490,30 +545,32 @@ def main():
     # Scan for existing analyses
     existing_analyses = scan_existing_analyses()
     
-    # Present options to the user
+    # Present integrated menu options to the user
+    print("\nOptions:")
+    print("0. Run a new analysis")
+    
     if existing_analyses:
-        print("\nExisting analyses found:")
         for i, analysis in enumerate(existing_analyses):
-            print(f"{i+1}. {analysis['policy']} ({analysis['timestamp']}) - {analysis['languages']} languages, {analysis['samples_per_language']} samples per language")
-        
-        print("\nOptions:")
-        print("0. Run a new analysis")
-        for i, analysis in enumerate(existing_analyses):
-            print(f"{i+1}. Visualize existing analysis: {analysis['policy']}")
-        
-        choice = -1
-        while choice < 0 or choice > len(existing_analyses):
-            try:
-                choice = int(input("\nEnter your choice (0 for new analysis): "))
-            except ValueError:
-                print("Please enter a valid number.")
-        
-        if choice > 0:
-            # Visualize existing analysis
-            selected_analysis = existing_analyses[choice-1]
-            print(f"\nVisualizing existing analysis for {selected_analysis['policy']}...")
-            visualize_existing_analysis(selected_analysis)
-            return
+            lang_text = f"{analysis['languages']} languages"
+            sample_text = f"{analysis['samples_per_language']} samples per language"
+            print(f"{i+1}. Visualize existing analysis: {analysis['policy']} ({analysis['timestamp']}) - {lang_text}, {sample_text}")
+    
+    choice = -1
+    max_choice = len(existing_analyses)
+    while choice < 0 or choice > max_choice:
+        try:
+            choice = int(input("\nEnter your choice (0 for new analysis): "))
+            if choice < 0 or choice > max_choice:
+                print(f"Please enter a number between 0 and {max_choice}.")
+        except ValueError:
+            print("Please enter a valid number.")
+    
+    if choice > 0:
+        # Visualize existing analysis
+        selected_analysis = existing_analyses[choice-1]
+        print(f"\nVisualizing existing analysis for {selected_analysis['policy']}...")
+        visualize_existing_analysis(selected_analysis)
+        return
     
     # Proceed with new analysis if chosen or no existing analyses found
     print("\nStarting new analysis...")
@@ -628,64 +685,96 @@ def main():
         total_iterations = len(selected_languages) * samples
         iteration = 0
         
-        for language in selected_languages:
-            language_name = language['name']
-            language_code = language['code']
-            
-            print(f"\nProcessing {language_name}...")
-            results[language_name] = {
-                'support_count': 0,
-                'oppose_count': 0,
-                'error_count': 0,
-                'explanations': [],
-                'pros': [],
-                'cons': [],
-                'prompts': []
-            }
-            
-            for i in range(samples):
-                iteration += 1
-                print(f"Progress: {iteration}/{total_iterations} - Running sample {i+1}/{samples} for {language_name}")
+        try:
+            for language in selected_languages:
+                language_name = language['name']
+                language_code = language['code']
                 
-                # Translate prompt if needed
-                prompt = translate_prompt(policy, language_code, client)
+                print(f"\nProcessing {language_name}...")
+                results[language_name] = {
+                    'support_count': 0,
+                    'oppose_count': 0,
+                    'error_count': 0,
+                    'explanations': [],
+                    'pros': [],
+                    'cons': [],
+                    'prompts': []
+                }
                 
-                # Store the prompt for reference
-                results[language_name]['prompts'].append(prompt)
-                
-                # Ask the policy question
-                response = ask_policy_question(prompt, client, language_code)
-                
-                # Write to CSV
-                writer.writerow({
-                    'language': language_name,
-                    'sample_id': i + 1,
-                    'prompt': prompt,
-                    'explanation': response['explanation'],
-                    'pro': response['pro'],
-                    'con': response['con'],
-                    'support': response['support']
-                })
-                
-                # Update results
-                if response['support'] == 1:
-                    results[language_name]['support_count'] += 1
-                elif response['support'] == 0:
-                    results[language_name]['oppose_count'] += 1
-                else:
-                    results[language_name]['error_count'] += 1
-                
-                results[language_name]['explanations'].append(response['explanation'])
-                results[language_name]['pros'].append(response['pro'])
-                results[language_name]['cons'].append(response['con'])
-                
-                # Save after each sample in case of interruption
-                csvfile.flush()
-                
-                # Small delay to avoid rate limiting
-                time.sleep(0.5)
+                for i in range(samples):
+                    iteration += 1
+                    current_progress = f"Progress: {iteration}/{total_iterations} - Running sample {i+1}/{samples} for {language_name}"
+                    print(current_progress)
+                    
+                    while True:
+                        try:
+                            # Translate prompt if needed
+                            prompt = translate_prompt(policy, language_code, client)
+                            
+                            # Store the prompt for reference
+                            results[language_name]['prompts'].append(prompt)
+                            
+                            # Ask the policy question
+                            response = ask_policy_question(prompt, client, language_code)
+                            
+                            # Process response
+                            if response['support'] is not None:
+                                if response['support'] == 1:
+                                    results[language_name]['support_count'] += 1
+                                else:
+                                    results[language_name]['oppose_count'] += 1
+                            else:
+                                results[language_name]['error_count'] += 1
+                            
+                            results[language_name]['explanations'].append(response['explanation'])
+                            results[language_name]['pros'].append(response['pro'])
+                            results[language_name]['cons'].append(response['con'])
+                            
+                            # Write to CSV
+                            writer.writerow({
+                                'language': language_name,
+                                'sample_id': i + 1,
+                                'prompt': prompt,
+                                'explanation': response['explanation'],
+                                'pro': response['pro'],
+                                'con': response['con'],
+                                'support': response['support']
+                            })
+                            csvfile.flush()
+                            
+                            # Small delay to avoid rate limiting
+                            time.sleep(0.5)
+                            break  # Break the while loop on success
+                        
+                        # Special handling for AbortAnalysis - let it propagate up
+                        except AbortAnalysis:
+                            raise  # Re-raise to ensure it's caught at the top level
+                            
+                        except Exception as e:
+                            action = handle_api_error(e, current_progress)
+                            if action == "retry":
+                                continue  # Try again after waiting
+                            elif action == "abort":
+                                print(f"\n{'='*60}")
+                                print("ANALYSIS ABORTED BY USER")
+                                print("No more API calls will be made. Proceeding with analysis of collected data.")
+                                print(f"{'='*60}\n")
+                                # Raise AbortAnalysis to break out of all loops
+                                raise AbortAnalysis("User requested to abort the entire analysis")
+                            else:
+                                print(f"Error processing sample: {e}")
+                                # Store as an error and continue to next sample
+                                results[language_name]['error_count'] += 1
+                                break  # Break the retry loop and move to next sample
+                            
+        except AbortAnalysis as e:
+            print(f"\n{'='*60}")
+            print(f"ANALYSIS ABORTED: {e}")
+            print(f"No more API calls will be made. Proceeding with analysis of collected data.")
+            print(f"{'='*60}\n")
+            # Fall through to continue processing what we have
         
-        # Step 5: Generate summary statistics
+        # Generate summary and visualization with collected data
         print("\nGenerating summary statistics...")
         
         with open(output_summary, 'w', encoding='utf-8') as summary_file:
