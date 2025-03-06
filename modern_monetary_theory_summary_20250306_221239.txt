@@ -1,0 +1,80 @@
+APRIL: All Policy Really Is Local
+Policy Analysis: Modern Monetary Theory
+Date: 2025-03-06 23:54:40
+Total samples: 1200
+
+Results by Language:
+====================
+
+English:
+  Support: 16 (16.0%)
+  Oppose: 84 (84.0%)
+
+Spanish:
+  Support: 97 (97.0%)
+  Oppose: 3 (3.0%)
+
+French:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+German:
+  Support: 9 (9.0%)
+  Oppose: 91 (91.0%)
+
+Italian:
+  Support: 94 (94.0%)
+  Oppose: 3 (3.0%)
+  Errors: 3 (3.0%)
+
+Portuguese:
+  Support: 96 (96.0%)
+  Oppose: 4 (4.0%)
+
+Russian:
+  Support: 66 (66.0%)
+  Oppose: 34 (34.0%)
+
+Japanese:
+  Support: 99 (99.0%)
+  Oppose: 1 (1.0%)
+
+Korean:
+  Support: 89 (89.0%)
+  Oppose: 11 (11.0%)
+
+Chinese:
+  Support: 97 (97.0%)
+  Oppose: 3 (3.0%)
+
+Arabic:
+  Support: 69 (69.0%)
+  Oppose: 31 (31.0%)
+
+Hindi:
+  Support: 89 (89.0%)
+  Oppose: 11 (11.0%)
+
+
+Summary:
+========
+
+Overall support across all languages: 76.8%
+
+Most supportive language: French (100.0%)
+Least supportive language: German (9.0%)
+
+Variance in support across languages: 940.02
+Standard deviation: 30.66
+
+Analysis Details:
+=================
+
+Model: GPT-4o-mini
+Date: 2025-03-06
+Number of languages: 12
+Samples per language: 100
+Total API calls: 1200
+CSV file: modern_monetary_theory_analysis_20250306_221239.csv
+Analysis ID: 20250306_221239
+GitHub: https://github.com/economicalstories/april

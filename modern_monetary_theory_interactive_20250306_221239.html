@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Basic Income Analysis</title>
+    <title>Modern Monetary Theory Analysis</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -168,42 +168,42 @@
     <div class="dashboard-container">
         <div class="header">
             <h1>APRIL: All Policy Really Is Local</h1>
-            <h2>Support for Universal Basic Income by Language</h2>
-            <p>Analysis of how GPT-4o responds when prompted in different languages</p>
+            <h2>Support for Modern Monetary Theory by Language</h2>
+            <p>Analysis of how GPT-4o-mini responds when prompted in different languages</p>
         </div>
 
         <div class="chart-container" id="chart-main"></div>
         
         <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-value">37.2%</div>
+                <div class="stat-value">76.8%</div>
                 <div class="stat-label">Overall Support Rate</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">64.0%</div>
-                <div class="stat-label">Highest Support (Arabic)</div>
+                <div class="stat-value">100.0%</div>
+                <div class="stat-label">Highest Support (French)</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">18.0%</div>
-                <div class="stat-label">Lowest Support (Hindi)</div>
+                <div class="stat-value">9.0%</div>
+                <div class="stat-label">Lowest Support (German)</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">12.85</div>
+                <div class="stat-value">30.66</div>
                 <div class="stat-label">Standard Deviation</div>
             </div>
         </div>
 
         <div class="info-section">
             <h3>Key Insights</h3>
-            <p>This analysis reveals variation in how the AI model responds to Universal Basic Income questions when prompted in different languages.</p>
-            <p>When prompted in Arabic, the model expressed support at 64.0%, while in Hindi, support was expressed at only 18.0%.</p>
-            <p>The standard deviation of 12.85 quantifies the dispersion in support rates across the tested languages, potentially highlighting linguistic and cultural factors influencing AI responses.</p>
+            <p>This analysis reveals variation in how the AI model responds to Modern Monetary Theory questions when prompted in different languages.</p>
+            <p>When prompted in French, the model expressed support at 100.0%, while in German, support was expressed at only 9.0%.</p>
+            <p>The standard deviation of 30.66 quantifies the dispersion in support rates across the tested languages, potentially highlighting linguistic and cultural factors influencing AI responses.</p>
             
             <h3 style="margin-top: 20px;">Methodology</h3>
             <div class="method-specs">
                 <div class="method-item">
                     <strong>Model</strong>
-                    <span>GPT-4o</span>
+                    <span>GPT-4o-mini</span>
                 </div>
                 <div class="method-item">
                     <strong>Date</strong>
@@ -223,7 +223,7 @@
                 </div>
                 <div class="method-item">
                     <strong>Analysis ID</strong>
-                    <span>20250302_220913</span>
+                    <span>20250306_221239</span>
                 </div>
             </div>
         </div>
@@ -237,69 +237,69 @@
     <script>
         // Embedded data from the analysis
         const languageData = [
-            {language: "Arabic", support: 64.0, oppose: 36.0},
-            {language: "French", support: 56.0, oppose: 44.0},
-            {language: "Portuguese", support: 44.0, oppose: 56.0},
-            {language: "Chinese", support: 44.0, oppose: 56.0},
-            {language: "Italian", support: 39.0, oppose: 61.0},
-            {language: "English", support: 38.0, oppose: 62.0},
-            {language: "Korean", support: 34.0, oppose: 66.0},
-            {language: "Russian", support: 30.0, oppose: 70.0},
-            {language: "Japanese", support: 30.0, oppose: 70.0},
-            {language: "Spanish", support: 29.0, oppose: 71.0},
-            {language: "German", support: 21.0, oppose: 79.0},
-            {language: "Hindi", support: 18.0, oppose: 82.0}
+            {language: "French", support: 100.0, oppose: 0.0},
+            {language: "Japanese", support: 99.0, oppose: 1.0},
+            {language: "Spanish", support: 97.0, oppose: 3.0},
+            {language: "Chinese", support: 97.0, oppose: 3.0},
+            {language: "Portuguese", support: 96.0, oppose: 4.0},
+            {language: "Italian", support: 94.0, oppose: 3.0},
+            {language: "Korean", support: 89.0, oppose: 11.0},
+            {language: "Hindi", support: 89.0, oppose: 11.0},
+            {language: "Arabic", support: 69.0, oppose: 31.0},
+            {language: "Russian", support: 66.0, oppose: 34.0},
+            {language: "English", support: 16.0, oppose: 84.0},
+            {language: "German", support: 9.0, oppose: 91.0}
         ];
         
         // Example arguments for/against by language
         const exampleArguments = {
-            "Arabic": {
-                support: "السبب الرئيسي لدعم هذه السياسة هو أنها قد تقلل من الفقر وتعزز الأمان المالي للأفراد.",
-                oppose: "السبب الرئيسي لمعارضة هذه السياسة هو التكلفة العالية التي قد تتطلبها على ميزانية الحكومة وقد تؤدي إلى زيادة الضرائب."
-            },
             "French": {
-                support: "Cette politique peut réduire la pauvreté et offrir une sécurité financière de base à tous les individus, améliorant ainsi la qualité de vie globale.",
-                oppose: "Le financement d'un Revenu de Base Universel peut entraîner une augmentation significative des impôts ou une réduction des dépenses publiques dans d'autres domaines essentiels."
-            },
-            "Portuguese": {
-                support: "Esta política pode reduzir a pobreza e simplificar o sistema de bem-estar social, promovendo igualdade econômica e segurança financeira.",
-                oppose: "O alto custo de implementação pode sobrecarregar as finanças públicas e diminuir o incentivo ao trabalho para alguns indivíduos."
-            },
-            "Chinese": {
-                support: "支持该政策的主要理由是它可以减少贫困，提高人民的生活质量，并简化社会福利体系。",
-                oppose: "反对该政策的主要理由是其高成本可能导致财政不可持续，并减少人们工作的动机。"
-            },
-            "Italian": {
-                support: "Sostenere il Reddito di Base Universale potrebbe ridurre la povertà e fornire una rete di sicurezza finanziaria a tutti, stimolando al contempo l'economia attraverso una maggiore capacità di spesa dei cittadini.",
-                oppose: "Implementare il Reddito di Base Universale richiede risorse finanziarie significative, che potrebbero portare a un aumento delle tasse o al taglio di altri servizi pubblici e benefici sociali."
-            },
-            "English": {
-                support: "UBI can reduce poverty and economic inequality by providing a financial safety net that ensures a basic standard of living for everyone.",
-                oppose: "UBI could be prohibitively expensive for governments to maintain, potentially leading to increased taxes or cuts in other essential services."
-            },
-            "Korean": {
-                support: "이 정책은 빈곤 감소와 경제적 불평등 해소에 기여할 수 있습니다.",
-                oppose: "재정적 부담이 커져 국가의 다른 중요한 복지 서비스가 약화될 수 있습니다."
-            },
-            "Russian": {
-                support: "Основной аргумент в поддержку УБД заключается в его потенциале для снижения нищеты и обеспечения базового уровня жизни для всех граждан.",
-                oppose: "Основной аргумент против УБД заключается в его высокой стоимости, которая может привести к значительным налоговым увеличениям или сокращению других социальных программ."
+                support: "Cette politique permettrait de financer des programmes sociaux et d'infrastructure sans augmenter les impôts, ce qui pourrait stimuler la croissance économique.",
+                oppose: "Critiques soutiennent que cette approche pourrait entraîner une inflation incontrôlée si elle est mal gérée, affectant ainsi la stabilité économique à long terme."
             },
             "Japanese": {
-                support: "UBIは貧困を削減し、経済的不平等を緩和する可能性があります。",
-                oppose: "UBIは財政的に持続不可能であり、労働意欲を低下させる可能性があります。"
+                support: "この政策は、政府が積極的に経済を刺激し、失業率を下げる手段として有効とされています。",
+                oppose: "しかし、無制限の貨幣発行はインフレを引き起こし、経済に悪影響を及ぼす可能性があります。"
             },
             "Spanish": {
-                support: "El principal argumento a favor del Ingreso Básico Universal es que puede reducir la pobreza y la desigualdad al proporcionar seguridad financiera básica a todos los ciudadanos.",
-                oppose: "El principal argumento en contra es que financiar un programa así podría ser muy costoso y desafiar la sostenibilidad fiscal del país."
+                support: "Este enfoque permite que los gobiernos inviertan en infraestructura y servicios sociales sin las restricciones de un presupuesto equilibrado, estimulando el crecimiento económico y el empleo.",
+                oppose: "Al financiar el gasto público sin restricciones, existe el riesgo de inflación y de devaluación de la moneda, lo que podría perjudicar la estabilidad económica a largo plazo."
             },
-            "German": {
-                support: "Ein Hauptargument für das BGE ist, dass es Armut verringern und den sozialen Zusammenhalt stärken kann, indem es allen Bürgern ein finanzielles Sicherheitsnetz bietet.",
-                oppose: "Kritiker argumentieren, dass das BGE wirtschaftlich nicht nachhaltig ist, da die Finanzierung hohe Steuern erfordern würde und es möglicherweise die Arbeitsbereitschaft verringert."
+            "Chinese": {
+                support: "支持者认为，该理论可以帮助政府有效应对经济衰退，通过增加货币供应刺激经济增长和创造就业机会。",
+                oppose: "反对者认为，该理论可能导致通货膨胀加剧和财政不负责任，从而损害长期经济稳定。"
+            },
+            "Portuguese": {
+                support: "Apoiar a TMM pode permitir que os governos invistam em infraestrutura e serviços sociais, promovendo crescimento econômico e redução da desigualdade.",
+                oppose: "Por outro lado, a TMM pode levar a um aumento da inflação se os gastos públicos não forem cuidadosamente monitorados e controlados."
+            },
+            "Italian": {
+                support: "La principale ragione per sostenere questa politica è che può contribuire a ridurre la disoccupazione e stimolare la crescita economica attraverso un aumento della spesa pubblica.",
+                oppose: "La principale ragione per opporsi a questa politica è che potrebbe portare a un'inflazione incontrollata e a un debito pubblico insostenibile."
+            },
+            "Korean": {
+                support: "이 이론을 지지하는 주된 이유는 정부가 통화를 발행함으로써 실업을 줄이고 경제 성장을 촉진할 수 있다는 점입니다.",
+                oppose: "반대하는 주된 이유는 무제한적인 통화 발행이 인플레이션을 초래하고 경제의 지속 가능성을 해칠 수 있다는 점입니다."
             },
             "Hindi": {
-                support: "इस नीति से गरीबी घटेगी और आर्थिक असमानता में कमी आएगी क्योंकि यह सभी नागरिकों के लिए एक न्यूनतम आय सुनिश्चित करती है।",
-                oppose: "इस नीति को लागू करने के लिए आवश्यक धनराशि जुटाना सरकार के लिए बेहद चुनौतीपूर्ण हो सकता है, जिससे बजट असंतुलन हो सकता है।"
+                support: "इस नीति का मुख्य समर्थन यह है कि यह सरकार को अधिक खर्च करने की अनुमति देती है, जिससे अर्थव्यवस्था को प्रेरित किया जा सकता है।",
+                oppose: "इस नीति का मुख्य विरोध यह है कि इससे मुद्रास्फीति बढ़ सकती है, जिससे दीर्घकालिक आर्थिक स्थिरता को खतरा हो सकता है।"
+            },
+            "Arabic": {
+                support: "الدعم لهذه النظرية يأتي من قدرتها على تعزيز النمو الاقتصادي من خلال زيادة الإنفاق الحكومي في فترات الركود.",
+                oppose: "المعارضة لهذه النظرية تستند إلى مخاوف من التضخم المفرط الناتج عن الإنفاق الحكومي المفرط وخلق النقود."
+            },
+            "Russian": {
+                support: "Основная причина поддерживать эту политику заключается в том, что она может способствовать экономическому росту и полной занятости без необходимости увеличивать налоги.",
+                oppose: "Основная причина противиться этой политике состоит в том, что она может привести к инфляции и обесцениванию валюты, если не будет должного контроля за денежной массой."
+            },
+            "English": {
+                support: "Supporters of MMT argue that it allows for increased public spending on social programs and infrastructure without the immediate concern of budget deficits.",
+                oppose: "Opponents contend that MMT could lead to excessive inflation and undermine the value of currency if not managed properly."
+            },
+            "German": {
+                support: "Ein Hauptgrund, diese Politik zu unterstützen, ist, dass sie potenziell zur Verringerung der Arbeitslosigkeit und zur Stärkung der Wirtschaft beitragen kann.",
+                oppose: "Ein Hauptgrund, diese Politik abzulehnen, ist die Sorge, dass eine unbegrenzte Geldschöpfung zu Inflation führen könnte, die die Kaufkraft der Bürger gefährdet."
             }
         };
 
@@ -444,7 +444,7 @@
                 displayModeBar: false,
                 toImageButtonOptions: {
                     format: 'png',
-                    filename: 'universal_basic_income_support_by_language',
+                    filename: 'modern_monetary_theory_support_by_language',
                     height: 800,
                     width: 1200,
                     scale: 2

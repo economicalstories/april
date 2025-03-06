@@ -22,6 +22,8 @@ import re
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 import numpy as np
+import glob
+import sys
 
 try:
     from openai import OpenAI
@@ -59,6 +61,28 @@ LANGUAGE_OPTIONS = {
     "10": {"name": "Hindi", "code": "hindi"},
     "11": {"name": "Portuguese", "code": "portuguese"},
     "12": {"name": "Italian", "code": "italian"}
+}
+
+# Add these model configuration constants near the top of the file, after LANGUAGE_OPTIONS
+MODEL_OPTIONS = {
+    "1": {
+        "name": "GPT-4o",
+        "id": "gpt-4o",
+        "cost_per_call": 0.004,  # $0.004 per API call (estimated)
+        "description": "Most powerful, highest accuracy, most expensive"
+    },
+    "2": {
+        "name": "GPT-4o-mini",
+        "id": "gpt-4o-mini",
+        "cost_per_call": 0.0015,  # $0.0015 per API call (estimated)
+        "description": "Good balance of capability and cost"
+    },
+    "3": {
+        "name": "GPT-3.5-turbo",
+        "id": "gpt-3.5-turbo",
+        "cost_per_call": 0.0005,  # $0.0005 per API call (estimated)
+        "description": "Less capable but most affordable, good for high volume"
+    }
 }
 
 def get_openai_api_key() -> Optional[str]:
@@ -117,13 +141,14 @@ def handle_api_error(e, current_progress=None):
                 print("Invalid choice. Please enter 'r' to retry or 'a' to abort.")
     return "error"
 
-def translate_prompt(policy: str, language: str, client: Any) -> str:
+def translate_prompt(policy: str, language: str, client: Any, model_id: str) -> str:
     """Translate prompt into the target language.
     
     Args:
         policy: The name of the policy to analyze.
         language: Target language for translation.
         client: OpenAI client instance.
+        model_id: The ID of the model to use.
     
     Returns:
         Translated prompt.
@@ -141,7 +166,7 @@ def translate_prompt(policy: str, language: str, client: Any) -> str:
     while True:
         try:
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model=model_id,
                 messages=[
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": english_prompt}
@@ -164,7 +189,7 @@ def translate_prompt(policy: str, language: str, client: Any) -> str:
                 print(f"Error translating to {language}. Using English prompt.")
                 return english_prompt
 
-def ask_policy_question(prompt: str, client: Any, language_code: str) -> Dict[str, Any]:
+def ask_policy_question(prompt: str, client: Any, language_code: str, model_id: str) -> Dict[str, Any]:
     """
     Ask a policy question to ChatGPT and get the response.
     
@@ -172,6 +197,7 @@ def ask_policy_question(prompt: str, client: Any, language_code: str) -> Dict[st
         prompt: The policy question prompt
         client: OpenAI client object
         language_code: The language code to ensure response in the same language
+        model_id: The ID of the model to use
         
     Returns:
         Dictionary with explanation and binary support value
@@ -202,7 +228,7 @@ def ask_policy_question(prompt: str, client: Any, language_code: str) -> Dict[st
     while True:
         try:
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model=model_id,
                 messages=[
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": prompt}
@@ -260,7 +286,7 @@ def ask_policy_question(prompt: str, client: Any, language_code: str) -> Dict[st
                 print(f"Error asking policy question: {e}")
                 return result
 
-def create_visualization(results: Dict[str, Dict], policy: str, timestamp: str, safe_policy: str) -> str:
+def create_visualization(results: Dict[str, Dict], policy: str, timestamp: str, safe_policy: str, model_name: str) -> str:
     """
     Create a bar chart visualization of the policy sentiment analysis results.
     
@@ -269,6 +295,7 @@ def create_visualization(results: Dict[str, Dict], policy: str, timestamp: str, 
         policy: The policy topic being analyzed
         timestamp: Timestamp string for the filename
         safe_policy: Sanitized policy name for the filename
+        model_name: The name of the selected model
         
     Returns:
         Path to the saved visualization file
@@ -323,7 +350,7 @@ def create_visualization(results: Dict[str, Dict], policy: str, timestamp: str, 
     
     # Add metadata as a text box
     metadata = (
-        f"Model: GPT-4o\n"
+        f"Model: {model_name}\n"
         f"Date: {datetime.now().strftime('%Y-%m-%d')}\n"
         f"Sample size: {samples_per_language} per language\n"
         f"Total API calls: {total_samples}\n"
@@ -370,60 +397,79 @@ def create_visualization(results: Dict[str, Dict], policy: str, timestamp: str, 
 # Function to scan for existing analysis files
 def scan_existing_analyses() -> List[Dict[str, Any]]:
     """
-    Scan for existing analysis files (CSV and summary text files)
+    Scan for existing analysis files in the current directory
     
     Returns:
-        List of dictionaries containing information about existing analyses
+        List of dictionaries containing analysis information
     """
     analyses = []
+    summary_files = glob.glob("*_summary_*.txt")
     
-    # Pattern to match analysis CSV files
-    pattern = r'(.+)_analysis_(\d{8}_\d{6})\.csv'
+    print(f"Looking for summary files... Found {len(summary_files)}: {summary_files}")
     
-    # Look for CSV files in the current directory
-    csv_files = [f for f in os.listdir('.') if f.endswith('.csv') and '_analysis_' in f]
+    for summary_file in summary_files:
+        try:
+            print(f"Processing file: {summary_file}")
+            with open(summary_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Debug - show first part of content
+            print(f"File content preview: {content[:100]}...")
+            
+            # Updated regex to match "Policy Analysis: X" pattern
+            policy_match = re.search(r"Policy(?:\s+Analysis)?:\s+(.*?)(?:\n|$)", content)
+            timestamp_match = re.search(r"Analysis ID: (.*?)(?:\n|$)", content)
+            languages_match = re.search(r"Number of languages: (\d+)", content)
+            samples_match = re.search(r"Samples per language: (\d+)", content)
+            csv_match = re.search(r"CSV file: (.*?\.csv)", content)
+            model_match = re.search(r"Model: (.*?)(?:\n|$)", content)
+            
+            # Debug matches
+            print(f"  Policy match: {policy_match.group(1) if policy_match else 'None'}")
+            print(f"  Timestamp match: {timestamp_match.group(1) if timestamp_match else 'None'}")
+            print(f"  Languages match: {languages_match.group(1) if languages_match else 'None'}")
+            print(f"  Samples match: {samples_match.group(1) if samples_match else 'None'}")
+            print(f"  CSV match: {csv_match.group(1) if csv_match else 'None'}")
+            print(f"  Model match: {model_match.group(1) if model_match else 'None'}")
+            
+            if policy_match and timestamp_match and languages_match and samples_match and csv_match:
+                policy = policy_match.group(1).strip()
+                timestamp = timestamp_match.group(1).strip()
+                languages_count = int(languages_match.group(1))
+                samples_per_language = int(samples_match.group(1))
+                csv_file = csv_match.group(1).strip()
+                
+                # Get model name if available, otherwise use "Unknown Model"
+                model_name = "Unknown Model"
+                if model_match:
+                    model_name = model_match.group(1).strip()
+                
+                print(f"  Model name detected: {model_name}")
+                
+                if os.path.exists(csv_file):
+                    analyses.append({
+                        'policy': policy,
+                        'timestamp': timestamp,
+                        'languages': languages_count,
+                        'samples_per_language': samples_per_language,
+                        'csv_file': csv_file,
+                        'model': model_name
+                    })
+                    print(f"  ✓ Successfully added analysis for {policy}")
+                else:
+                    print(f"  ✗ CSV file not found: {csv_file}")
+            else:
+                missing = []
+                if not policy_match: missing.append("policy")
+                if not timestamp_match: missing.append("timestamp")
+                if not languages_match: missing.append("languages count") 
+                if not samples_match: missing.append("samples per language")
+                if not csv_match: missing.append("CSV file")
+                print(f"  ✗ Missing required information: {', '.join(missing)}")
+        except Exception as e:
+            print(f"Error reading summary file {summary_file}: {e}")
     
-    for file in csv_files:
-        match = re.match(pattern, file)
-        if match:
-            policy_name = match.group(1).replace('_', ' ')
-            timestamp = match.group(2)
-            
-            # Check if there's a corresponding summary file
-            summary_file = f"{policy_name.replace(' ', '_')}_summary_{timestamp}.txt"
-            has_summary = os.path.exists(summary_file)
-            
-            # Check if there's a corresponding visualization file
-            viz_file = f"{policy_name.replace(' ', '_')}_visualization_{timestamp}.png"
-            has_viz = os.path.exists(viz_file)
-            
-            # Get number of languages and samples by scanning the CSV
-            languages = set()
-            samples = 0
-            
-            try:
-                with open(file, 'r', encoding='utf-8') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        languages.add(row['language'])
-                        samples += 1
-            except Exception as e:
-                print(f"Error reading {file}: {e}")
-            
-            analyses.append({
-                'policy': policy_name,
-                'timestamp': timestamp,
-                'csv_file': file,
-                'summary_file': summary_file if has_summary else None,
-                'viz_file': viz_file if has_viz else None,
-                'languages': len(languages),
-                'samples': samples,
-                'samples_per_language': samples // len(languages) if len(languages) > 0 else 0
-            })
-    
-    # Sort by timestamp (newest first)
-    analyses.sort(key=lambda x: x['timestamp'], reverse=True)
-    
+    print(f"Found {len(analyses)} valid analyses")
     return analyses
 
 # Function to load results from an existing analysis file
@@ -502,24 +548,620 @@ def visualize_existing_analysis(analysis_info: Dict[str, Any]) -> None:
     csv_file = analysis_info['csv_file']
     policy = analysis_info['policy']
     timestamp = analysis_info['timestamp']
-    safe_policy = policy.replace(' ', '_')
+    samples_per_language = analysis_info['samples_per_language']
+    safe_policy = policy.replace(' ', '_').lower()
+    
+    print(f"\nVisualizing existing analysis for {policy}...")
     
     # Load results from CSV
     results = load_analysis_results(csv_file)
     
-    # Create visualization
-    viz_file = create_visualization(results, policy, timestamp, safe_policy)
+    # Use the model name from analysis_info
+    model_name = analysis_info.get('model', "Unknown Model")
     
-    if viz_file:
-        print(f"\nVisualization created: {viz_file}")
+    # Create visualization
+    if MATPLOTLIB_AVAILABLE:
+        viz_file = create_visualization(results, policy, timestamp, safe_policy, model_name)
+        if viz_file:
+            print(f"\nVisualization created: {viz_file}")
+            
+            # Optionally display the visualization (if in Jupyter notebook)
+            if 'ipykernel' in sys.modules:
+                try:
+                    from IPython.display import display, Image
+                    display(Image(viz_file))
+                except ImportError:
+                    pass
+    
+    # Create interactive HTML visualization
+    interactive_html = create_interactive_html(results, policy, timestamp, safe_policy, model_name, samples_per_language)
+    if interactive_html:
+        print(f"Interactive HTML visualization saved as: {interactive_html}")
+
+def check_rate_limits(client: Any, model_id: str) -> Dict[str, str]:
+    """
+    Make a minimal API call to check current rate limits via response headers.
+    
+    Args:
+        client: OpenAI client instance
+        model_id: The model ID to check limits for
         
-        # Optionally display the visualization (if in Jupyter notebook)
-        if 'ipykernel' in sys.modules:
-            try:
-                from IPython.display import display, Image
-                display(Image(viz_file))
-            except ImportError:
-                pass
+    Returns:
+        Dictionary containing rate limit information
+    """
+    print("\nChecking current API rate limits...")
+    
+    try:
+        # Try with a minimal model first to avoid hitting quota issues
+        fallback_model = "gpt-3.5-turbo" if model_id != "gpt-3.5-turbo" else "gpt-3.5-turbo-instruct"
+        print(f"Using {fallback_model} for rate limit check (to conserve quota)...")
+        
+        # Make a minimal request to get headers
+        response = client.chat.completions.create(
+            model=fallback_model,
+            messages=[{"role": "user", "content": "hello"}],
+            max_tokens=5
+        )
+        
+        # The OpenAI Python client doesn't directly expose headers in the response object
+        # Instead, we can check if the API call succeeded as a basic connectivity test
+        
+        print("\n=== API Connection Test ===")
+        print(f"✓ Successfully connected to OpenAI API")
+        print(f"✓ Model {fallback_model} is working")
+        print(f"✓ Response received: \"{response.choices[0].message.content}\"")
+        print("===============================")
+        
+        # Return empty dict since we can't get actual rate limit info
+        return {}
+        
+    except Exception as e:
+        error_str = str(e).lower()
+        is_quota_error = (
+            'insufficient_quota' in error_str or 
+            'code: 429' in error_str or 
+            'exceeded your current quota' in error_str
+        )
+        
+        if is_quota_error:
+            print("\n=== API Quota Error ===")
+            print("You've hit your API quota limit. This may indicate:")
+            print("1. Your account doesn't have sufficient funds")
+            print("2. You've exhausted your rate limits")
+            print("3. Your account might be restricted")
+            print("\nConsider checking your usage at: https://platform.openai.com/usage")
+            print("And account billing at: https://platform.openai.com/account/billing")
+            print("===============================")
+        else:
+            print(f"\nError connecting to API: {e}")
+        
+        print("\nProceeding without rate limit information.")
+        
+        check_anyway = input("\nWould you like to continue with the analysis anyway? (y/n): ")
+        if check_anyway.lower() != 'y':
+            print("Analysis cancelled.")
+            return "ABORT"
+            
+        return {}
+
+def create_interactive_html(results: Dict[str, Dict], policy: str, timestamp: str, 
+                           safe_policy: str, model_name: str, samples_per_language: int) -> str:
+    """
+    Create an interactive HTML visualization using Plotly.js
+    
+    Args:
+        results: Dictionary containing analysis results by language
+        policy: The policy topic being analyzed
+        timestamp: Timestamp string for the filename
+        safe_policy: Sanitized policy name for the filename
+        model_name: The name of the selected model
+        samples_per_language: Number of samples per language
+        
+    Returns:
+        Path to the saved HTML file
+    """
+    # Prepare data for visualization
+    languages = []
+    support_percentages = []
+    oppose_percentages = []
+    
+    for language_name, data in results.items():
+        total = data['support_count'] + data['oppose_count'] + data['error_count']
+        if total > 0:
+            languages.append(language_name)
+            support_percent = (data['support_count'] / total) * 100
+            oppose_percent = (data['oppose_count'] / total) * 100
+            support_percentages.append(support_percent)
+            oppose_percentages.append(oppose_percent)
+    
+    # Sort by support percentage (descending)
+    sorted_data = sorted(zip(languages, support_percentages, oppose_percentages), 
+                        key=lambda x: x[1], reverse=True)
+    languages = [x[0] for x in sorted_data]
+    support_percentages = [x[1] for x in sorted_data]
+    oppose_percentages = [x[2] for x in sorted_data]
+    
+    # Calculate overall stats
+    overall_support = sum(data['support_count'] for data in results.values())
+    overall_total = sum(data['support_count'] + data['oppose_count'] + data['error_count'] for data in results.values())
+    overall_rate = (overall_support / overall_total) * 100 if overall_total > 0 else 0
+    
+    # Find highest and lowest support
+    highest_support = sorted_data[0] if sorted_data else (None, 0, 0)
+    lowest_support = sorted_data[-1] if sorted_data else (None, 0, 0)
+    
+    # Calculate standard deviation if we have enough data
+    if len(support_percentages) > 1:
+        std_dev = (sum((x - sum(support_percentages) / len(support_percentages)) ** 2 
+                   for x in support_percentages) / len(support_percentages)) ** 0.5
+    else:
+        std_dev = 0
+    
+    # Extract example arguments (if available)
+    example_arguments = {}
+    for language_name, data in results.items():
+        example_arguments[language_name] = {
+            "support": data['pros'][0] if data['pros'] and len(data['pros']) > 0 else "No example available.",
+            "oppose": data['cons'][0] if data['cons'] and len(data['cons']) > 0 else "No example available."
+        }
+    
+    # Convert policy to title case
+    policy_title_case = ' '.join(word.capitalize() for word in policy.split())
+    
+    # Create HTML content with updated heading structure
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{policy_title_case} Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {{
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }}
+        body {{
+            background-color: #f8fafc;
+            color: #334155;
+            padding: 20px;
+            min-height: 100vh;
+        }}
+        .dashboard-container {{
+            max-width: 1200px;
+            width: 95%;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            padding: 35px;
+        }}
+        .header {{
+            margin-bottom: 30px;
+            text-align: center;
+        }}
+        .header h1 {{
+            color: #4338ca;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4338ca, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }}
+        .header h2 {{
+            color: #1e293b;
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }}
+        .header p {{
+            color: #64748b;
+            font-size: 16px;
+            max-width: 700px;
+            margin: 0 auto;
+        }}
+        .chart-container {{
+            height: 550px;
+            margin: 30px 0 30px 0;
+            border-radius: 12px;
+            overflow: visible;
+            background-color: white;
+            width: 100%;
+        }}
+        .stats-row {{
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+        }}
+        .stat-card {{
+            flex: 1;
+            min-width: 180px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            text-align: center;
+            border-top: 4px solid #4338ca;
+            transition: transform 0.2s ease;
+        }}
+        .stat-card:hover {{
+            transform: translateY(-5px);
+        }}
+        .stat-card:nth-child(1) {{
+            border-top-color: #6366f1;
+        }}
+        .stat-card:nth-child(2) {{
+            border-top-color: #10b981;
+        }}
+        .stat-card:nth-child(3) {{
+            border-top-color: #ef4444;
+        }}
+        .stat-card:nth-child(4) {{
+            border-top-color: #f59e0b;
+        }}
+        .stat-value {{
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }}
+        .stat-label {{
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }}
+        .info-section {{
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }}
+        .info-section h3 {{
+            color: #4338ca;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }}
+        .info-section p {{
+            color: #64748b;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }}
+        .footer {{
+            margin-top: 40px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }}
+        .method-specs {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }}
+        .method-item {{
+            flex: 1;
+            min-width: 150px;
+            background-color: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+        }}
+        .method-item strong {{
+            display: block;
+            color: #4338ca;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }}
+        .method-item span {{
+            color: #64748b;
+            font-size: 14px;
+        }}
+        @media (max-width: 768px) {{
+            .stats-row {{
+                flex-direction: column;
+            }}
+            .stat-card {{
+                min-width: 100%;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>APRIL: All Policy Really Is Local</h1>
+            <h2>Support for {policy_title_case} by Language</h2>
+            <p>Analysis of how {model_name} responds when prompted in different languages</p>
+        </div>
+
+        <div class="chart-container" id="chart-main"></div>
+        
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value">{overall_rate:.1f}%</div>
+                <div class="stat-label">Overall Support Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{highest_support[1]:.1f}%</div>
+                <div class="stat-label">Highest Support ({highest_support[0]})</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{lowest_support[1]:.1f}%</div>
+                <div class="stat-label">Lowest Support ({lowest_support[0]})</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{std_dev:.2f}</div>
+                <div class="stat-label">Standard Deviation</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Key Insights</h3>
+            <p>This analysis reveals variation in how the AI model responds to {policy_title_case} questions when prompted in different languages.</p>
+            <p>When prompted in {highest_support[0]}, the model expressed support at {highest_support[1]:.1f}%, while in {lowest_support[0]}, support was expressed at only {lowest_support[1]:.1f}%.</p>
+            <p>The standard deviation of {std_dev:.2f} quantifies the dispersion in support rates across the tested languages, potentially highlighting linguistic and cultural factors influencing AI responses.</p>
+            
+            <h3 style="margin-top: 20px;">Methodology</h3>
+            <div class="method-specs">
+                <div class="method-item">
+                    <strong>Model</strong>
+                    <span>{model_name}</span>
+                </div>
+                <div class="method-item">
+                    <strong>Date</strong>
+                    <span>{datetime.now().strftime('%Y-%m-%d')}</span>
+                </div>
+                <div class="method-item">
+                    <strong>Languages</strong>
+                    <span>{len(languages)}</span>
+                </div>
+                <div class="method-item">
+                    <strong>Samples per language</strong>
+                    <span>{samples_per_language}</span>
+                </div>
+                <div class="method-item">
+                    <strong>Total API calls</strong>
+                    <span>{len(languages) * samples_per_language}</span>
+                </div>
+                <div class="method-item">
+                    <strong>Analysis ID</strong>
+                    <span>{timestamp}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>APRIL: All Policy Really Is Local | Analysis Date: {datetime.now().strftime('%Y-%m-%d')}</p>
+            <p>GitHub: <a href="https://github.com/economicalstories/april" style="color: #4338ca; text-decoration: none;">https://github.com/economicalstories/april</a></p>
+        </div>
+    </div>
+"""
+
+    # Update the script part to fix the legend positioning
+    script_part = """
+    <script>
+        // Embedded data from the analysis
+        const languageData = [
+            {languages_and_data}
+        ];
+        
+        // Example arguments for/against by language
+        const exampleArguments = {
+            {example_args_json}
+        };
+
+        // Extract languages and support values for charting
+        const languages = languageData.map(d => d.language);
+        const supportValues = languageData.map(d => d.support);
+        const opposeValues = languageData.map(d => d.oppose);
+
+        // Create the stacked bar chart visualization
+        function createStackedBarChart() {
+            // Prepare the hover templates with proper formatting
+            const supportHoverTemplate = languages.map((lang, i) => {
+                return `<b>${lang}: ${supportValues[i].toFixed(1)}% Support</b><br>${exampleArguments[lang].support}`;
+            });
+            
+            const opposeHoverTemplate = languages.map((lang, i) => {
+                return `<b>${lang}: ${opposeValues[i].toFixed(1)}% Oppose</b><br>${exampleArguments[lang].oppose}`;
+            });
+            
+            const supportTrace = {
+                x: languages,
+                y: supportValues,
+                type: 'bar',
+                name: 'Support',
+                marker: {
+                    color: '#10b981',
+                    opacity: 1.0,
+                    line: {
+                        color: '#10b981',
+                        width: 0
+                    }
+                },
+                text: supportValues.map(val => val.toFixed(1) + '%'),
+                textposition: 'auto',
+                textfont: {
+                    color: 'white',
+                    size: 14,
+                    weight: 'bold'
+                },
+                hovertemplate: supportHoverTemplate,
+                cliponaxis: false
+            };
+
+            const opposeTrace = {
+                x: languages,
+                y: opposeValues,
+                type: 'bar',
+                name: 'Oppose',
+                marker: {
+                    color: '#ef4444',
+                    opacity: 1.0,
+                    line: {
+                        color: '#ef4444',
+                        width: 0
+                    }
+                },
+                text: opposeValues.map(val => val.toFixed(1) + '%'),
+                textposition: 'auto',
+                textfont: {
+                    color: 'white',
+                    size: 14,
+                    weight: 'bold'
+                },
+                hovertemplate: opposeHoverTemplate,
+                cliponaxis: false
+            };
+
+            const layout = {
+                barmode: 'stack',
+                bargap: 0.15,
+                bargroupgap: 0.05,
+                xaxis: {
+                    title: {
+                        text: '',
+                        font: {
+                            size: 14,
+                            color: '#64748b'
+                        }
+                    },
+                    tickangle: -30,
+                    tickfont: {
+                        color: '#64748b',
+                        size: 13
+                    },
+                    automargin: true
+                },
+                yaxis: {
+                    title: {
+                        text: 'Percentage (%)',
+                        font: {
+                            size: 14,
+                            color: '#64748b'
+                        }
+                    },
+                    range: [0, 105],
+                    tickfont: {
+                        color: '#64748b'
+                    },
+                    gridcolor: '#f1f5f9'
+                },
+                margin: {
+                    l: 60,
+                    r: 30,
+                    t: 5,
+                    b: 70
+                },
+                legend: {
+                    orientation: 'h',
+                    y: -0.10,
+                    x: 0.5,
+                    xanchor: 'center',
+                    yanchor: 'top',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 14,
+                        color: '#64748b'
+                    },
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                    bordercolor: '#e2e8f0',
+                    borderwidth: 1
+                },
+                autosize: true,
+                height: 520,
+                width: null,
+                plot_bgcolor: 'white',
+                paper_bgcolor: 'white',
+                hoverlabel: {
+                    bgcolor: 'white',
+                    bordercolor: '#e2e8f0',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 14,
+                        color: '#1e293b'
+                    },
+                    align: 'left'
+                },
+                hovermode: 'closest'
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: false,
+                toImageButtonOptions: {
+                    format: 'png',
+                    filename: '{safe_policy}_support_by_language',
+                    height: 800,
+                    width: 1200,
+                    scale: 2
+                }
+            };
+
+            Plotly.newPlot('chart-main', [supportTrace, opposeTrace], layout, config);
+            
+            // Add resize listener to handle responsive resizing
+            window.addEventListener('resize', function() {
+                Plotly.Plots.resize(document.getElementById('chart-main'));
+            });
+        }
+
+        // Initialize chart when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            createStackedBarChart();
+        });
+    </script>
+</body>
+</html>
+    """
+    
+    # The replacements for policy_title_case and model_name aren't needed in the chart title anymore,
+    # but we'll keep them for any other places they might be used
+    script_part = script_part.replace("{policy_title_case}", policy_title_case)
+    script_part = script_part.replace("{model_name}", model_name)
+    script_part = script_part.replace("{safe_policy}", safe_policy)
+    
+    # Format the language data for JS
+    languages_json = []
+    for lang, support, oppose in zip(languages, support_percentages, oppose_percentages):
+        languages_json.append(f'{{language: "{lang}", support: {support:.1f}, oppose: {oppose:.1f}}}')
+    
+    # Join the language JSON objects with commas
+    languages_and_data = ",\n            ".join(languages_json)
+    
+    # Format the example arguments for JS
+    example_args = []
+    for lang in languages:
+        if lang in example_arguments:
+            support_arg = example_arguments[lang]["support"].replace('"', '\\"')
+            oppose_arg = example_arguments[lang]["oppose"].replace('"', '\\"')
+            example_args.append(f'"{lang}": {{\n                support: "{support_arg}",\n                oppose: "{oppose_arg}"\n            }}')
+    
+    # Join the example arguments JSON objects with commas
+    example_args_json = ",\n            ".join(example_args)
+    
+    # Replace the placeholders with the formatted JSON
+    script_part = script_part.replace("{languages_and_data}", languages_and_data)
+    script_part = script_part.replace("{example_args_json}", example_args_json)
+    
+    # Combine HTML and script
+    full_html = html_content + script_part
+    
+    # Save to file
+    output_file = f"{safe_policy}_interactive_{timestamp}.html"
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(full_html)
+    
+    return output_file
 
 def main():
     """
@@ -575,11 +1217,31 @@ def main():
     # Proceed with new analysis if chosen or no existing analyses found
     print("\nStarting new analysis...")
     
-    # Step 1: Get the policy topic
-    policy = input("Enter the policy topic to analyze (e.g., 'Universal Basic Income'): ")
+    # Step 1: Select model
+    print("\nSelect model to use:")
+    for key, model in MODEL_OPTIONS.items():
+        print(f"{key}. {model['name']} - {model['description']}")
     
-    # Step 2: Create a safe version of the policy name for filenames
-    safe_policy = re.sub(r'[^\w\s]', '', policy).replace(' ', '_').lower()
+    model_choice = ""
+    while model_choice not in MODEL_OPTIONS:
+        model_choice = input("\nEnter model choice (default: 2 for GPT-4o-mini): ").strip()
+        if model_choice == "":
+            model_choice = "2"  # Default to GPT-4o-mini
+    
+    selected_model = MODEL_OPTIONS[model_choice]
+    model_id = selected_model["id"]
+    model_name = selected_model["name"]
+    cost_per_call = selected_model["cost_per_call"]
+    
+    print(f"\nSelected model: {model_name}")
+    
+    # Check rate limits
+    rate_info = check_rate_limits(client, model_id)
+    if rate_info == "ABORT":
+        return
+    
+    # Get the policy topic
+    policy = input("Enter the policy topic to analyze (e.g., 'Universal Basic Income'): ")
     
     # Step 3: Show language options and get selection
     languages = [
@@ -651,14 +1313,36 @@ def main():
     
     # Calculate estimated API calls and cost
     total_api_calls = len(selected_languages) * samples
-    estimated_cost = total_api_calls * 0.004  # Estimated cost based on GPT-4o as of March 2023
+    estimated_cost = total_api_calls * cost_per_call
+    estimated_tokens = total_api_calls * 1000  # Rough estimate of tokens per call
     
     print("\nAnalysis plan:")
     print(f"- Topic: {policy}")
+    print(f"- Model: {model_name}")
     print(f"- Languages: {len(selected_languages)}")
     print(f"- Responses per language: {samples}")
     print(f"- Total API calls: {total_api_calls}")
     print(f"- Estimated cost: ${estimated_cost:.2f}")
+    
+    # Add rate limit check information
+    if rate_info:
+        requests_remaining = rate_info.get("requests_remaining", "Unknown")
+        tokens_remaining = rate_info.get("tokens_remaining", "Unknown")
+        
+        if requests_remaining != "Unknown" and tokens_remaining != "Unknown":
+            print(f"\nRate limit check:")
+            if int(requests_remaining) < total_api_calls:
+                print(f"⚠️ WARNING: Your planned analysis requires {total_api_calls} API calls, but you only have {requests_remaining} remaining!")
+                print(f"   Consider reducing the sample size or waiting until limits reset in {rate_info.get('requests_reset', 'Unknown')}")
+            else:
+                print(f"✓ You have sufficient API call capacity ({requests_remaining} remaining, need {total_api_calls})")
+            
+            if int(tokens_remaining) < estimated_tokens:
+                print(f"⚠️ WARNING: Your planned analysis may require ~{estimated_tokens} tokens, but you only have {tokens_remaining} remaining!")
+                print(f"   Consider reducing the sample size or waiting until limits reset in {rate_info.get('tokens_reset', 'Unknown')}")
+            else:
+                print(f"✓ You have sufficient token capacity ({tokens_remaining} remaining, estimated need ~{estimated_tokens})")
+    
     print("\nNote: Please check OpenAI's current pricing at https://openai.com/pricing before proceeding.")
     
     confirm = input("\nProceed with analysis? (y/n): ")
@@ -670,8 +1354,8 @@ def main():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
     # Define output files
-    output_csv = f"{safe_policy}_analysis_{timestamp}.csv"
-    output_summary = f"{safe_policy}_summary_{timestamp}.txt"
+    output_csv = f"{policy.replace(' ', '_').lower()}_analysis_{timestamp}.csv"
+    output_summary = f"{policy.replace(' ', '_').lower()}_summary_{timestamp}.txt"
     
     # Prepare CSV file
     with open(output_csv, 'w', newline='', encoding='utf-8') as csvfile:
@@ -709,13 +1393,13 @@ def main():
                     while True:
                         try:
                             # Translate prompt if needed
-                            prompt = translate_prompt(policy, language_code, client)
+                            prompt = translate_prompt(policy, language_code, client, model_id)
                             
                             # Store the prompt for reference
                             results[language_name]['prompts'].append(prompt)
                             
                             # Ask the policy question
-                            response = ask_policy_question(prompt, client, language_code)
+                            response = ask_policy_question(prompt, client, language_code, model_id)
                             
                             # Process response
                             if response['support'] is not None:
@@ -833,7 +1517,7 @@ def main():
             
             summary_file.write("\nAnalysis Details:\n")
             summary_file.write("=================\n\n")
-            summary_file.write(f"Model: GPT-4o\n")
+            summary_file.write(f"Model: {model_name}\n")
             summary_file.write(f"Date: {datetime.now().strftime('%Y-%m-%d')}\n")
             summary_file.write(f"Number of languages: {len(selected_languages)}\n")
             summary_file.write(f"Samples per language: {samples}\n")
@@ -845,7 +1529,7 @@ def main():
         # Create visualization if matplotlib is available
         if MATPLOTLIB_AVAILABLE:
             print("\nGenerating visualization...")
-            viz_file = create_visualization(results, policy, timestamp, safe_policy)
+            viz_file = create_visualization(results, policy, timestamp, policy.replace(' ', '_').lower(), model_name)
             if viz_file:
                 print(f"Visualization saved as: {viz_file}")
                 
@@ -862,7 +1546,10 @@ def main():
         print(f"\nAnalysis complete!")
         print(f"Results saved to {output_csv} and {output_summary}")
         
+        # Create interactive HTML visualization
+        interactive_html = create_interactive_html(results, policy, timestamp, policy.replace(' ', '_').lower(), model_name, samples)
+        if interactive_html:
+            print(f"Interactive HTML visualization saved as: {interactive_html}")
+        
 if __name__ == "__main__":
-    # Add import for Jupyter notebook support
-    import sys
     main() 
