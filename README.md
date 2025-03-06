@@ -2,21 +2,61 @@
 
 ## A Cross-Linguistic Investigation of AI Policy Reasoning
 
-<p align="center">
-  <img src="https://github.com/economicalstories/april/blob/main/sample_visualization.png" alt="APRIL visualization example" width="700"/>
-</p>
-
-APRIL tests whether large language models express consistent policy preferences across different languages, inspired by Anthea Roberts' foundational work "*Is International Law International?*" (2017).
-
 **Key Question**: Do LLMs say the same thing in different languages when asked about policy topics?
 
 ## Motivation
 
-Anthea Roberts demonstrated that supposedly "universal" legal principles are interpreted differently depending on where and in what language they're taught. APRIL extends this critical insight to artificial intelligence:
+Professor Anthea Roberts demonstrated that supposedly "universal" legal principles are interpreted differently depending on where and in what language they're taught.
+
+APRIL extends this critical insight to generative artificial intelligence:
 
 > *If we rely on LLMs in our policy processes, the advice they provide will be conditioned by the language in which we ask our questions.*
 
 Even when a model like GPT-4o is trained on multilingual data, the representations of concepts in different languages don't map identically. This has profound implications for global AI governance and policy deployment.
+
+<p align="center">
+  <img src="https://github.com/economicalstories/april/blob/main/universal_basic_income_visualization_20250302_220913.png" alt="APRIL visualization example" width="700"/>
+</p>
+
+### Universal Basic Income (UBI) Examples
+
+Below are example responses from the model on Universal Basic Income (UBI):
+
+**English Example:**
+- **Prompt:** Explain in a sentence what Universal Basic Income is, and then indicate if you support this policy with 1 for yes or 0 for no.
+- **Explanation:** Universal Basic Income (UBI) is a government program in which every adult citizen receives a set amount of money regularly, regardless of other income sources or employment status.
+- **Pro Argument:** The main reason to support UBI is that it can reduce poverty and provide a safety net, helping to alleviate income inequality and stimulate economic growth.
+- **Con Argument:** The main reason to oppose UBI is that it can be extremely costly to implement on a large scale, potentially leading to significant increases in taxes or cuts to other essential government services.
+- **Support:** 1 (Yes)
+
+**Spanish Example:**
+- **Prompt:** Explique en una oración qué es el Ingreso Básico Universal, y luego indique si apoya esta política con 1 para sí o 0 para no.
+- **Explanation:** El Ingreso Básico Universal es una política que propone proporcionar un monto fijo de dinero regularmente a todos los ciudadanos sin considerar su situación financiera individual.
+- **Pro Argument:** El principal argumento a favor del Ingreso Básico Universal es que puede reducir la pobreza y la desigualdad al asegurar que todos tengan acceso a recursos financieros básicos.
+- **Con Argument:** La principal crítica contra el Ingreso Básico Universal es el alto costo de implementación, que podría requerir incrementos significativos en impuestos o la reasignación de fondos de otros servicios públicos esenciales.
+- **Support:** 1 (Yes)
+
+**Statistical Analysis:**
+- When running the English prompt with N=100 samples, the support rate was 38.0%
+- When increasing to N=1000 samples, the support rate was 41.3%
+- This comparison shows reasonable consistency between different sample sizes
+
+You can find detailed results in the following project files:
+- Complete response data in CSV format: `universal_basic_income_analysis_20250302_220913.csv`
+- Summary statistics: `universal_basic_income_summary_20250302_220913.txt`
+
+### Cross-Language Comparison
+
+The summary file reveals significant variation in UBI support across languages:
+
+- Most supportive language: Arabic (64.0%)
+- Least supportive language: Hindi (18.0%)
+- Overall support across all languages: 37.2%
+- Standard deviation: 12.85
+
+This demonstrates how the same policy question can yield dramatically different responses depending on the language used to prompt the model.
+
+APRIL tests whether large language models express consistent policy preferences across different languages
 
 ## Getting Started
 
@@ -69,6 +109,20 @@ The tool will guide you through the following steps:
    - CSV file with all raw responses
    - Text summary with statistics
    - Visualization showing support rates across languages
+
+
+### Interactive Visualization
+
+For a more dynamic exploration of the results, we've created an interactive visualization:
+
+- Interactive dashboard: `universal_basic_income_interactive_20250302_220913.html`
+
+This standalone HTML file contains an interactive stacked bar chart showing support and opposition percentages across all tested languages. Hover over any bar to see example arguments for or against the policy in that specific language.
+
+**How it was created:** The interactive visualization was developed by providing Claude 3.7 Sonnet with the raw data from our CSV analysis file and static PNG visualization. Through several iterative refinements, we transformed this into a standalone HTML file using Plotly.js for visualization, with all data embedded directly in the file. This allows for a rich interactive experience without requiring any external dependencies or server connections.
+
+To view the interactive visualization, simply open the HTML file in any modern web browser. The visualization works well on both desktop and mobile devices.
+
 
 ## Methodology
 
@@ -146,44 +200,5 @@ If you use APRIL in your research, please cite:
 
 ## Acknowledgments
 
-Special thanks to Anthea Roberts for the theoretical inspiration behind this project.
+Special thanks to Anthea Roberts for the theoretical inspiration behind this project drawing on concepts from "*Is International Law International?*" (2017).
 
-## Example Results
-
-### Universal Basic Income (UBI) Examples
-
-Below are example responses from the model on Universal Basic Income (UBI):
-
-**English Example:**
-- **Prompt:** Explain in a sentence what Universal Basic Income is, and then indicate if you support this policy with 1 for yes or 0 for no.
-- **Explanation:** Universal Basic Income (UBI) is a government program in which every adult citizen receives a set amount of money regularly, regardless of other income sources or employment status.
-- **Pro Argument:** The main reason to support UBI is that it can reduce poverty and provide a safety net, helping to alleviate income inequality and stimulate economic growth.
-- **Con Argument:** The main reason to oppose UBI is that it can be extremely costly to implement on a large scale, potentially leading to significant increases in taxes or cuts to other essential government services.
-- **Support:** 1 (Yes)
-
-**Spanish Example:**
-- **Prompt:** Explique en una oración qué es el Ingreso Básico Universal, y luego indique si apoya esta política con 1 para sí o 0 para no.
-- **Explanation:** El Ingreso Básico Universal es una política que propone proporcionar un monto fijo de dinero regularmente a todos los ciudadanos sin considerar su situación financiera individual.
-- **Pro Argument:** El principal argumento a favor del Ingreso Básico Universal es que puede reducir la pobreza y la desigualdad al asegurar que todos tengan acceso a recursos financieros básicos.
-- **Con Argument:** La principal crítica contra el Ingreso Básico Universal es el alto costo de implementación, que podría requerir incrementos significativos en impuestos o la reasignación de fondos de otros servicios públicos esenciales.
-- **Support:** 1 (Yes)
-
-**Statistical Analysis:**
-- When running the English prompt with N=100 samples, the support rate was 38.0%
-- When increasing to N=1000 samples, the support rate was 41.3%
-- This comparison shows reasonable consistency between different sample sizes
-
-You can find detailed results in the following project files:
-- Complete response data in CSV format: `universal_basic_income_analysis_20250302_220913.csv`
-- Summary statistics: `universal_basic_income_summary_20250302_220913.txt`
-
-### Cross-Language Comparison
-
-The summary file reveals significant variation in UBI support across languages:
-
-- Most supportive language: Arabic (64.0%)
-- Least supportive language: Hindi (18.0%)
-- Overall support across all languages: 37.2%
-- Standard deviation: 12.85
-
-This demonstrates how the same policy question can yield dramatically different responses depending on the language used to prompt the model.
