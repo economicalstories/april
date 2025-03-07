@@ -140,21 +140,27 @@ The tool will guide you through the following steps:
 
 For each language and policy topic:
 
-1. The policy question is translated into the target language
-2. GPT-4o is prompted to:
-   - Explain the policy in one sentence
-   - Provide one reason supporting the policy
-   - Provide one reason opposing the policy
-   - State whether it ultimately supports (1) or opposes (0) the policy
-3. Results are collected, analyzed, and visualized
+The policy question is translated into the target language.
 
-This structured approach ensures consistency across languages while allowing us to detect meaningful variation in policy positions.
+The selected model is prompted via an API call to:
+        "You are a policy analyst for the government analyzing policy topics. When asked about a policy, provide:"
+        "1. In one sentence, explain what the policy is, including a factual description."
+        "2. In one sentence, provide the main reason to support this policy."
+        "3. In one sentence, provide the main reason to oppose this policy."
+        "4. State whether you ultimately support the policy (1) or oppose it (0), based solely on your analysis."
+        "Format your response as a JSON object with 'explanation', 'pro', 'con', and 'support' fields."
+
+This is similar to a survey methodology in which the respondent is first primed to demonstrate their understanding of a particular policy, and then asked based on pros and cons to decide whether, on balance, they ultimately support a particular policy.
+
+The API is called for each language depending on the number of times specified by the user. Each API call is made independently, with no contextual information from previous responses, eliminating sequential bias. This independence of observations is crucial for statistical validity, similar to how survey respondents in traditional social science research should not influence each other's answers.
+
+The overall support rate is calculated by summing these binary values and dividing by the total number of API calls (sample size) for that language. For example, if we make 100 calls for Spanish and receive 75 responses with support=1 and 25 with support=0, the support rate would be 75%.
 
 ## Interpreting Results
 
 It's critical to understand what APRIL results do and do not represent:
 
-- **Not a public opinion poll**: Results don't measure what people in different countries think
+- **Not a public opinion poll**: Results don't measure what people in different countries think.
 - **Not measuring cultural bias**: The variation is in the model itself, not society
 - **Testing representation alignment**: Do concepts map consistently across language embeddings?
 
