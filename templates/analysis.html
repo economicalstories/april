@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>APRIL: Policy Analysis Across Languages</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+    :root {
+        /* Modern color palette - Light theme with Indigo primary */
+        --color-primary: #4f46e5;        /* Indigo 600 */
+        --color-primary-light: #6366f1;  /* Indigo 500 */
+        --color-primary-dark: #4338ca;   /* Indigo 700 */
+        
+        --color-secondary: #f59e0b;      /* Amber 500 */
+        --color-secondary-light: #fbbf24; /* Amber 400 */
+        --color-secondary-dark: #d97706;  /* Amber 600 */
+        
+        --color-bg-primary: #ffffff;     /* white */
+        --color-bg-secondary: #f8fafc;   /* slate-50 */
+        --color-bg-accent: #f1f5f9;      /* slate-100 */
+        
+        --color-text-primary: #0f172a;   /* slate-900 */
+        --color-text-secondary: #334155; /* slate-700 */
+        --color-text-muted: #64748b;     /* slate-500 */
+        
+        --color-border: #e2e8f0;         /* slate-200 */
+        --color-shadow: rgba(15, 23, 42, 0.08);
+        --color-grid: #e2e8f0;           /* slate-200 */
+        
+        /* UI Enhancements */
+        --radius-sm: 6px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --transition-all: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Dark theme */
+    html[data-theme="dark"] {
+        --color-primary: #818cf8;        /* Indigo 400 */
+        --color-primary-light: #a5b4fc;  /* Indigo 300 */
+        --color-primary-dark: #6366f1;   /* Indigo 500 */
+        
+        --color-secondary: #fbbf24;      /* Amber 400 */
+        --color-secondary-light: #fcd34d; /* Amber 300 */
+        --color-secondary-dark: #f59e0b;  /* Amber 500 */
+        
+        --color-bg-primary: #0f172a;     /* slate-900 */
+        --color-bg-secondary: #1e293b;   /* slate-800 */
+        --color-bg-accent: #334155;      /* slate-700 */
+        
+        --color-text-primary: #f8fafc;   /* slate-50 */
+        --color-text-secondary: #e2e8f0; /* slate-200 */
+        --color-text-muted: #cbd5e1;     /* slate-300 */
+        
+        --color-border: #334155;         /* slate-700 */
+        --color-shadow: rgba(0, 0, 0, 0.3);
+        --color-grid: #334155;           /* slate-700 */
+    }
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.5;
+        background-color: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+        transition: var(--transition-all);
+        font-size: 14px;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    /* Dashboard container */
+    .dashboard-container {
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 30px;
+        background-color: var(--color-bg-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 10px 25px var(--color-shadow);
+        transition: var(--transition-all);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Page header */
+    .header {
+        text-align: center;
+        margin-bottom: 15px;
+        position: relative;
+    }
+    .header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--color-text-primary);
+        margin-bottom: 5px;
+        transition: color 0.3s;
+    }
+    .header h2 {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin-bottom: 5px;
+        transition: color 0.3s;
+    }
+    .header p {
+        font-size: 14px;
+        color: var(--color-text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+        transition: color 0.3s;
+    }
+    
+    /* Theme toggle button */
+    .theme-toggle {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: var(--color-bg-accent);
+        color: var(--color-text-secondary);
+        border: none;
+        padding: 5px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    .theme-toggle:hover {
+        background-color: var(--color-border);
+    }
+    .theme-toggle-icon {
+        font-size: 16px;
+        display: inline-block;
+    }
+    
+    /* Mobile-optimized chart container */
+    .chart-container {
+        height: auto;
+        min-height: 450px;
+        margin: 15px 0;
+        border-radius: 8px;
+        overflow: visible;
+        background-color: var(--color-bg-primary);
+        width: 100%;
+        transition: background-color 0.3s;
+    }
+    
+    /* Mobile-friendly example container */
+    .example-container {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: var(--radius-md);
+        background-color: var(--color-bg-accent);
+        border: 1px solid var(--color-border);
+        display: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px var(--color-shadow);
+        position: relative;
+        overflow: hidden;
+        border-left: 4px solid var(--color-primary);
+    }
+    
+    .example-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(to right, var(--color-primary-light), transparent);
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    .example-container.oppose {
+        border-left-color: var(--color-secondary);
+    }
+
+    .example-container.oppose::before {
+        background: linear-gradient(to right, var(--color-secondary-light), transparent);
+    }
+    
+    .example-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        align-items: center;
+    }
+    .example-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--color-text-primary);
+    }
+    .example-language {
+        background-color: var(--color-bg-accent);
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 13px;
+        color: var(--color-text-secondary);
+        border: 1px solid var(--color-border);
+    }
+    .example-content {
+        background-color: var(--color-bg-primary);
+        padding: 12px;
+        border-radius: 6px;
+        color: var(--color-text-primary);
+        line-height: 1.6;
+        font-size: 14px;
+        border: 1px solid var(--color-border);
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+    .example-type {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        margin-right: 8px;
+    }
+    .example-type.support {
+        background-color: rgba(71, 85, 105, 0.1);
+        color: var(--color-primary-dark);
+    }
+    .example-type.oppose {
+        background-color: rgba(217, 119, 6, 0.1);
+        color: var(--color-secondary-dark);
+    }
+    
+    /* Enhanced mobile-specific styles */
+    @media (max-width: 480px) {
+        .dashboard-container {
+            padding: 12px 10px;
+            width: 100%;
+            border-radius: 8px;
+        }
+        .header h1 {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+        .header h2 {
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+        .header p {
+            font-size: 12px;
+        }
+        .chart-container {
+            min-height: 380px;
+            margin: 10px 0;
+        }
+        .example-content {
+            font-size: 13px;
+            padding: 10px;
+        }
+        .example-header {
+            margin-bottom: 8px;
+        }
+        .example-title {
+            font-size: 14px;
+        }
+        .example-language {
+            font-size: 12px;
+            padding: 2px 6px;
+        }
+        .example-type {
+            font-size: 12px;
+            padding: 2px 6px;
+            margin-right: 5px;
+        }
+        .theme-toggle {
+            top: 8px;
+            right: 8px;
+            padding: 3px 6px;
+            font-size: 11px;
+        }
+        .theme-toggle-icon {
+            width: 14px;
+            height: 14px;
+        }
+    }
+    
+    /* Tablet optimizations */
+    @media (min-width: 481px) and (max-width: 768px) {
+        .dashboard-container {
+            padding: 20px 15px;
+        }
+        .header h1 {
+            font-size: 20px;
+        }
+        .header h2 {
+            font-size: 16px;
+        }
+        .chart-container {
+            min-height: 420px;
+        }
+    }
+
+    /* Stats row styling */
+    .stats-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin: 24px 0;
+        justify-content: space-between;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 180px;
+        background: linear-gradient(to bottom right, var(--color-bg-accent), var(--color-bg-primary));
+        padding: 20px;
+        border-radius: var(--radius-md);
+        box-shadow: 0 4px 12px var(--color-shadow);
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 1px solid var(--color-border);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px var(--color-shadow);
+    }
+
+    .stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--color-primary);
+        margin-bottom: 6px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: var(--color-text-secondary);
+        font-weight: 500;
+    }
+
+    /* Info section styling */
+    .info-section {
+        background-color: var(--color-bg-accent);
+        border-radius: var(--radius-md);
+        padding: 24px;
+        margin: 24px 0;
+        border-left: 4px solid var(--color-primary);
+    }
+
+    .info-section h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--color-text-primary);
+    }
+
+    .info-section p {
+        margin-bottom: 12px;
+        line-height: 1.6;
+        color: var(--color-text-secondary);
+    }
+
+    /* Footer metadata styling */
+    .footer-metadata {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 20px 0;
+        padding: 16px;
+        background-color: var(--color-bg-accent);
+        border-radius: var(--radius-md);
+        color: var(--color-text-secondary);
+        font-size: 13px;
+    }
+
+    .metadata-item {
+        margin-right: 16px;
+    }
+
+    /* Footer styling */
+    .footer {
+        margin-top: 30px;
+        text-align: center;
+        color: var(--color-text-muted);
+        font-size: 13px;
+        padding-top: 20px;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .footer a {
+        color: var(--color-primary);
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .footer a:hover {
+        color: var(--color-primary-dark);
+        text-decoration: underline;
+    }
+
+    /* Back link styling */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--color-text-secondary);
+        text-decoration: none;
+        font-size: 14px;
+        margin-bottom: 20px;
+        transition: color 0.3s;
+    }
+
+    .back-link:before {
+        content: "←";
+        margin-right: 6px;
+        font-size: 16px;
+    }
+
+    .back-link:hover {
+        color: var(--color-primary);
+    }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <a href="/" class="back-link">Back to Analysis List</a>
+        
+        <!-- Theme toggle button -->
+        <button id="theme-toggle" class="theme-toggle">
+            <span class="theme-toggle-icon">🌙</span>
+            <span class="theme-label">Dark Mode</span>
+        </button>
+        
+        <div class="header">
+            <h1>APRIL: All Policy Really Is Local</h1>
+            <h2>{{ analysis.policy.title() }} Support Rates Across Languages</h2>
+            <p>Analysis of how {{ analysis.model }} responds when prompted in different languages</p>
+        </div>
+
+        <div id="loading" class="loading">Loading visualization...</div>
+        <div class="chart-container" id="chart-main" style="display: none;"></div>
+        
+        <!-- Metadata display in boxed cards -->
+        <div id="metadata" class="stats-row" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value">{{ analysis.model }}</div>
+                <div class="stat-label">Model</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ analysis.timestamp[:4] }}-{{ analysis.timestamp[4:6] }}-{{ analysis.timestamp[6:8] }}</div>
+                <div class="stat-label">Date</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ analysis.samples_per_language }}</div>
+                <div class="stat-label">Samples per language</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ analysis.timestamp }}</div>
+                <div class="stat-label">Analysis ID</div>
+            </div>
+        </div>
+        
+        <!-- Analysis stats -->
+        <div id="stats-row" class="stats-row" style="display: none;">
+            <div class="stat-card">
+                <div id="overall-rate" class="stat-value">-</div>
+                <div class="stat-label">Overall Support Rate</div>
+            </div>
+            <div class="stat-card">
+                <div id="highest-support" class="stat-value">-</div>
+                <div id="highest-language" class="stat-label">Highest Support</div>
+            </div>
+            <div class="stat-card">
+                <div id="lowest-support" class="stat-value">-</div>
+                <div id="lowest-language" class="stat-label">Lowest Support</div>
+            </div>
+            <div class="stat-card">
+                <div id="std-dev" class="stat-value">-</div>
+                <div class="stat-label">Standard Deviation</div>
+            </div>
+        </div>
+        
+        <!-- Add example display section -->
+        <div id="example-container" class="example-container">
+            <div class="example-header">
+                <div>
+                    <span id="example-type" class="example-type support">Support</span>
+                    <span class="example-title">Example Argument</span>
+                </div>
+                <span id="example-language" class="example-language">Language</span>
+            </div>
+            <div id="example-content" class="example-content">
+                Hover over the bars to see example arguments for or against the policy in each language.
+            </div>
+        </div>
+        
+        <div id="info-section" class="info-section" style="display: none;">
+            <h3>Key Insights</h3>
+            <p id="insight-1">This analysis reveals variation in how the AI model responds to policy questions when prompted in different languages.</p>
+            <p id="insight-2">When prompted in specific languages, the model shows significant differences in its support for the policy.</p>
+            <p id="insight-3">The standard deviation quantifies the dispersion in support rates across the tested languages, potentially highlighting linguistic and cultural factors influencing AI responses.</p>
+        </div>
+
+        <div class="footer">
+            <p>APRIL: All Policy Really Is Local</p>
+            <p>GitHub: <a href="https://github.com/economicalstories/april">https://github.com/economicalstories/april</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Global variable to store data
+        let analysisData = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch data for the selected analysis
+            fetch('/api/analysis/{{ analysis.timestamp }}')
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(response.statusText + (errorData.error ? ': ' + errorData.error : ''));
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Data loaded:", data);
+                    
+                    // Store data globally
+                    analysisData = data;
+                    
+                    // Show content and hide loading
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('chart-main').style.display = 'block';
+                    document.getElementById('metadata').style.display = 'flex';
+                    document.getElementById('stats-row').style.display = 'flex';
+                    document.getElementById('info-section').style.display = 'block';
+                    
+                    // Update stats
+                    document.getElementById('overall-rate').textContent = data.stats.overall_rate.toFixed(1) + '%';
+                    document.getElementById('highest-support').textContent = data.stats.highest_support[1].toFixed(1) + '%';
+                    document.getElementById('highest-language').textContent = 'Highest Support (' + data.stats.highest_support[0] + ')';
+                    document.getElementById('lowest-support').textContent = data.stats.lowest_support[1].toFixed(1) + '%';
+                    document.getElementById('lowest-language').textContent = 'Lowest Support (' + data.stats.lowest_support[0] + ')';
+                    document.getElementById('std-dev').textContent = data.stats.std_dev.toFixed(2);
+                    
+                    // Update insights
+                    document.getElementById('insight-1').textContent = 
+                        `This analysis reveals variation in how the AI model responds to ${data.policy} questions when prompted in different languages.`;
+                    document.getElementById('insight-2').textContent = 
+                        `When prompted in ${data.stats.highest_support[0]}, the model expressed support at ${data.stats.highest_support[1].toFixed(1)}%, while in ${data.stats.lowest_support[0]}, support was expressed at only ${data.stats.lowest_support[1].toFixed(1)}%.`;
+                    
+                    // Initialize the chart
+                    initializeChart();
+                })
+                .catch(error => {
+                    console.error('Error fetching analysis data:', error);
+                    document.getElementById('loading').textContent = 'Error loading data: ' + error.message;
+                    
+                    // Create fallback data for testing UI
+                    analysisData = {
+                        policy: "Sample Policy",
+                        model: "Sample Model",
+                        timestamp: "{{ analysis.timestamp }}",
+                        samples_per_language: 10,
+                        languages: ["English", "Spanish", "French", "German", "Chinese"],
+                        support_percentages: [75, 65, 55, 45, 35],
+                        oppose_percentages: [25, 35, 45, 55, 65],
+                        examples: {
+                            "English": {"support": "Example support for English", "oppose": "Example oppose for English"},
+                            "Spanish": {"support": "Example support for Spanish", "oppose": "Example oppose for Spanish"},
+                            "French": {"support": "Example support for French", "oppose": "Example oppose for French"},
+                            "German": {"support": "Example support for German", "oppose": "Example oppose for German"},
+                            "Chinese": {"support": "Example support for Chinese", "oppose": "Example oppose for Chinese"}
+                        },
+                        stats: {
+                            overall_rate: 55,
+                            highest_support: ["English", 75],
+                            lowest_support: ["Chinese", 35],
+                            std_dev: 15.8
+                        }
+                    };
+                    
+                    // Even if there's an error, show the fallback visualization
+                    setTimeout(() => {
+                        document.getElementById('loading').innerHTML = 
+                            'Error loading data: ' + error.message + '<br><br>' +
+                            '<strong>Showing example visualization with dummy data.</strong>';
+                        
+                        // Show content 
+                        document.getElementById('chart-main').style.display = 'block';
+                        document.getElementById('metadata').style.display = 'flex';
+                        document.getElementById('stats-row').style.display = 'flex';
+                        document.getElementById('info-section').style.display = 'block';
+                        
+                        // Update stats with dummy data
+                        document.getElementById('overall-rate').textContent = analysisData.stats.overall_rate.toFixed(1) + '%';
+                        document.getElementById('highest-support').textContent = analysisData.stats.highest_support[1].toFixed(1) + '%';
+                        document.getElementById('highest-language').textContent = 'Highest Support (' + analysisData.stats.highest_support[0] + ')';
+                        document.getElementById('lowest-support').textContent = analysisData.stats.lowest_support[1].toFixed(1) + '%';
+                        document.getElementById('lowest-language').textContent = 'Lowest Support (' + analysisData.stats.lowest_support[0] + ')';
+                        document.getElementById('std-dev').textContent = analysisData.stats.std_dev.toFixed(2);
+                        
+                        // Update insights with dummy data
+                        document.getElementById('insight-1').textContent = 
+                            `This analysis reveals variation in how the AI model responds to ${analysisData.policy} questions when prompted in different languages.`;
+                        document.getElementById('insight-2').textContent = 
+                            `When prompted in ${analysisData.stats.highest_support[0]}, the model expressed support at ${analysisData.stats.highest_support[1].toFixed(1)}%, while in ${analysisData.stats.lowest_support[0]}, support was expressed at only ${analysisData.stats.lowest_support[1].toFixed(1)}%.`;
+                        
+                        // Initialize the chart with dummy data
+                        initializeChart();
+                    }, 2000);  // Wait 2 seconds to make sure user sees the error
+                });
+        });
+        
+        // Initialize the chart with the global data
+        function initializeChart() {
+            if (!analysisData || !analysisData.languages || analysisData.languages.length === 0) {
+                console.error("No data available for chart");
+                return;
+            }
+            
+            // Get the width of the container to adapt chart proportions
+            const containerWidth = document.querySelector('.chart-container').offsetWidth;
+            const isMobile = containerWidth < 480;
+            
+            // Create support trace using CSS variable
+            const supportTrace = {
+                x: analysisData.support_percentages.map(val => val.toFixed(1) + '%'),
+                y: analysisData.languages,
+                name: 'Support',
+                type: 'bar',
+                orientation: 'h',
+                marker: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#4f46e5'
+                },
+                width: 0.7,
+                hoverinfo: 'x+name'
+            };
+            
+            // Create oppose trace using CSS variable
+            const opposeTrace = {
+                x: analysisData.oppose_percentages.map(val => val.toFixed(1) + '%'),
+                y: analysisData.languages,
+                name: 'Oppose',
+                type: 'bar',
+                orientation: 'h',
+                marker: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim() || '#f59e0b'
+                },
+                width: 0.7,
+                hoverinfo: 'x+name'
+            };
+
+            // Chart layout
+            const layout = {
+                autosize: true,
+                margin: {
+                    l: 70,
+                    r: 30,
+                    t: 40,
+                    b: 50
+                },
+                height: 450,
+                barmode: 'stack',
+                bargap: 0.3,
+                xaxis: {
+                    range: [0, 100],
+                    ticksuffix: '%',
+                    showgrid: true,
+                    gridcolor: getComputedStyle(document.documentElement).getPropertyValue('--color-grid').trim(),
+                    fixedrange: true,
+                    zeroline: false
+                },
+                yaxis: {
+                    automargin: true,
+                    fixedrange: true
+                },
+                // Improved legend placement and styling
+                showlegend: true,
+                legend: {
+                    orientation: "h",
+                    y: 1.12,
+                    x: 0.5,
+                    xanchor: 'center',
+                    yanchor: 'top',
+                    traceorder: "normal",
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 12
+                    },
+                    bgcolor: 'rgba(0,0,0,0)',
+                    bordercolor: 'rgba(0,0,0,0)'
+                },
+                // No text annotations at the top
+                annotations: [],
+                font: {
+                    family: 'Inter, sans-serif',
+                    size: 12,
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-primary').trim()
+                },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                hovermode: 'closest'
+            };
+            
+            // Configuration with minimal UI
+            const config = {
+                responsive: true,
+                displayModeBar: false, // Hide all control buttons
+                scrollZoom: false,
+                showTips: false
+            };
+            
+            // Get chart container
+            const chartDiv = document.getElementById('chart-main');
+            
+            // Create the plot
+            Plotly.newPlot(chartDiv, [supportTrace, opposeTrace], layout, config)
+                .then(() => {
+                    console.log("Plot successfully created in element:", chartDiv);
+                    
+                    // Add hover event listener
+                    chartDiv.on('plotly_hover', function(eventData) {
+                        if (eventData.points && eventData.points.length > 0) {
+                            const pt = eventData.points[0];
+                            // Support is curveNumber 0, oppose is 1
+                            const isSupport = pt.curveNumber === 0;
+                            updateExample(pt.y, isSupport);
+                        }
+                    });
+                    
+                    // Show initial example (first language, support view)
+                    if (analysisData.languages.length > 0) {
+                        updateExample(analysisData.languages[0], true);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error creating chart:", error);
+                });
+                
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                Plotly.Plots.resize(chartDiv);
+            });
+        }
+        
+        // Update the example display
+        function updateExample(language, isSupport) {
+            const exampleContainer = document.getElementById('example-container');
+            const exampleType = document.getElementById('example-type');
+            const exampleLanguage = document.getElementById('example-language');
+            const exampleContent = document.getElementById('example-content');
+            
+            const type = isSupport ? 'support' : 'oppose';
+            let exampleText = "No example available.";
+            
+            // Get example text if available
+            if (analysisData && 
+                analysisData.examples && 
+                analysisData.examples[language] && 
+                analysisData.examples[language][type]) {
+                exampleText = analysisData.examples[language][type];
+            }
+            
+            // Update display
+            exampleLanguage.textContent = language;
+            exampleContent.textContent = exampleText;
+            
+            if (isSupport) {
+                exampleType.textContent = 'Support';
+                exampleType.className = 'example-type support';
+            } else {
+                exampleType.textContent = 'Oppose';
+                exampleType.className = 'example-type oppose';
+            }
+            
+            exampleContainer.style.display = 'block';
+        }
+
+        // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle.querySelector('.theme-toggle-icon');
+        const themeLabel = themeToggle.querySelector('.theme-label');
+        
+        // Check for saved theme preference or use device preference
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Set initial theme
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                themeLabel.textContent = 'Light Mode';
+        }
+        
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeIcon.textContent = '🌙';
+                themeLabel.textContent = 'Dark Mode';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.textContent = '☀️';
+                themeLabel.textContent = 'Light Mode';
+            }
+            
+            // Redraw the chart if it exists
+            const chartElement = document.getElementById('chart-main');
+            if (chartElement && chartElement._fullLayout) {
+                setTimeout(() => {
+                    // Update chart colors based on new theme
+                    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+                    const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim();
+                    const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--color-grid').trim();
+                    const textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text-primary').trim();
+                    const textSecondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary').trim();
+                    const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--color-bg-primary').trim();
+                    const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim();
+                    
+                    Plotly.update(chartElement, {
+                        'marker.color': [primaryColor, secondaryColor]
+                    }, {
+                        plot_bgcolor: bgColor,
+                        paper_bgcolor: bgColor,
+                        font: {color: textColor},
+                        xaxis: {gridcolor: gridColor, tickfont: {color: textSecondaryColor}},
+                        yaxis: {gridcolor: gridColor, tickfont: {color: textSecondaryColor}},
+                        annotations: [
+                            {
+                                font: {color: primaryColor}
+                            },
+                            {
+                                font: {color: secondaryColor}
+                            }
+                        ]
+                    });
+                }, 150);
+            }
+        });
+    </script>
+</body>
+</html>

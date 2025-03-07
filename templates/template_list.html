@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APRIL - Available Templates</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Modern color palette - Light theme with Indigo primary */
+            --color-primary: #4f46e5;        /* Indigo 600 */
+            --color-primary-light: #6366f1;  /* Indigo 500 */
+            --color-primary-dark: #4338ca;   /* Indigo 700 */
+            
+            --color-secondary: #f59e0b;      /* Amber 500 */
+            --color-secondary-light: #fbbf24; /* Amber 400 */
+            --color-secondary-dark: #d97706;  /* Amber 600 */
+            
+            --color-bg-primary: #ffffff;     /* white */
+            --color-bg-secondary: #f8fafc;   /* slate-50 */
+            --color-bg-accent: #f1f5f9;      /* slate-100 */
+            
+            --color-text-primary: #0f172a;   /* slate-900 */
+            --color-text-secondary: #334155; /* slate-700 */
+            --color-text-muted: #64748b;     /* slate-500 */
+            
+            --color-border: #e2e8f0;         /* slate-200 */
+            --color-shadow: rgba(15, 23, 42, 0.08);
+            
+            /* UI Enhancements */
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition-all: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Dark theme */
+        html[data-theme="dark"] {
+            --color-primary: #818cf8;        /* Indigo 400 */
+            --color-primary-light: #a5b4fc;  /* Indigo 300 */
+            --color-primary-dark: #6366f1;   /* Indigo 500 */
+            
+            --color-secondary: #fbbf24;      /* Amber 400 */
+            --color-secondary-light: #fcd34d; /* Amber 300 */
+            --color-secondary-dark: #f59e0b;  /* Amber 500 */
+            
+            --color-bg-primary: #0f172a;     /* slate-900 */
+            --color-bg-secondary: #1e293b;   /* slate-800 */
+            --color-bg-accent: #334155;      /* slate-700 */
+            
+            --color-text-primary: #f8fafc;   /* slate-50 */
+            --color-text-secondary: #e2e8f0; /* slate-200 */
+            --color-text-muted: #cbd5e1;     /* slate-300 */
+            
+            --color-border: #334155;         /* slate-700 */
+            --color-shadow: rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background-color: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            line-height: 1.5;
+            transition: var(--transition-all);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--color-bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px var(--color-shadow);
+            padding: 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+            border-radius: 2px;
+        }
+        
+        /* Theme toggle button */
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--color-bg-accent);
+            color: var(--color-text-secondary);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .theme-toggle:hover {
+            background-color: var(--color-border);
+        }
+        .theme-toggle-icon {
+            font-size: 16px;
+            display: inline-block;
+        }
+        
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        li {
+            margin-bottom: 15px;
+            padding: 18px;
+            background-color: var(--color-bg-accent);
+            border-radius: var(--radius-md);
+            box-shadow: 0 2px 10px var(--color-shadow);
+            transition: var(--transition-all);
+            animation: slideIn 0.5s ease-out backwards;
+        }
+        
+        li:nth-child(1) { animation-delay: 0.1s; }
+        li:nth-child(2) { animation-delay: 0.2s; }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        li:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px var(--color-shadow);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+        
+        a {
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition-all);
+        }
+        
+        a:hover {
+            color: var(--color-primary-dark);
+        }
+        
+        .description {
+            margin-top: 8px;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+        
+        .back-button {
+            display: block;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .back-button a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--color-bg-accent);
+            padding: 12px 20px;
+            border-radius: 30px;
+            transition: var(--transition-all);
+            box-shadow: 0 2px 8px var(--color-shadow);
+        }
+        
+        .back-button a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--color-shadow);
+        }
+        
+        .back-button a::before {
+            content: "←";
+            font-size: 18px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 25px 15px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            li {
+                padding: 15px;
+            }
+            
+            .description {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+    <h1>Available Templates</h1>
+            <button id="theme-toggle" class="theme-toggle">
+                <span class="theme-toggle-icon">🌙</span>
+                Toggle Theme
+            </button>
+        </div>
+        <ul>
+            <li>
+                <a href="/">Home</a>
+                <div class="description">Main page with analysis selector</div>
+            </li>
+            <li>
+                <a href="/analysis/example">Analysis</a>
+                <div class="description">Analysis visualization page (requires valid timestamp)</div>
+            </li>
+    </ul>
+        <div class="back-button">
+            <a href="/">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('.theme-toggle-icon');
+            
+            // Check for saved theme preference or use device preference
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            // Set initial theme
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+            }
+            
+            // Toggle theme
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                if (currentTheme === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.textContent = '🌙';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.textContent = '☀️';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

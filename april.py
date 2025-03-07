@@ -130,7 +130,7 @@ def handle_api_error(e, current_progress=None):
         
         while True:
             choice = input("\nWould you like to:\n1. Wait and retry (r)\n2. Abort and analyze collected data (a)\nYour choice (r/a): ")
-            if choice.lower() == 'r':
+                if choice.lower() == 'r':
                 print("\nWaiting 1 minute before retrying...")
                 time.sleep(60)  # Wait for 1 minute before retrying
                 return "retry"
@@ -447,9 +447,9 @@ def scan_existing_analyses() -> List[Dict[str, Any]]:
                 print(f"  Model name detected: {model_name}")
                 
                 if os.path.exists(csv_file):
-                    analyses.append({
+            analyses.append({
                         'policy': policy,
-                        'timestamp': timestamp,
+                'timestamp': timestamp,
                         'languages': languages_count,
                         'samples_per_language': samples_per_language,
                         'csv_file': csv_file,
@@ -562,16 +562,16 @@ def visualize_existing_analysis(analysis_info: Dict[str, Any]) -> None:
     # Create visualization
     if MATPLOTLIB_AVAILABLE:
         viz_file = create_visualization(results, policy, timestamp, safe_policy, model_name)
-        if viz_file:
-            print(f"\nVisualization created: {viz_file}")
-            
-            # Optionally display the visualization (if in Jupyter notebook)
-            if 'ipykernel' in sys.modules:
-                try:
-                    from IPython.display import display, Image
-                    display(Image(viz_file))
-                except ImportError:
-                    pass
+    if viz_file:
+        print(f"\nVisualization created: {viz_file}")
+        
+        # Optionally display the visualization (if in Jupyter notebook)
+        if 'ipykernel' in sys.modules:
+            try:
+                from IPython.display import display, Image
+                display(Image(viz_file))
+            except ImportError:
+                pass
     
     # Create interactive HTML visualization
     interactive_html = create_interactive_html(results, policy, timestamp, safe_policy, model_name, samples_per_language)

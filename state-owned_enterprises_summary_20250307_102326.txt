@@ -1,0 +1,79 @@
+APRIL: All Policy Really Is Local
+Policy Analysis: State-owned Enterprises
+Date: 2025-03-07 11:46:22
+Total samples: 1200
+
+Results by Language:
+====================
+
+English:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+Spanish:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+French:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+German:
+  Support: 89 (89.0%)
+  Oppose: 11 (11.0%)
+
+Italian:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+Portuguese:
+  Support: 93 (93.0%)
+  Oppose: 7 (7.0%)
+
+Russian:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+Japanese:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+Korean:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+Chinese:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+Arabic:
+  Support: 100 (100.0%)
+  Oppose: 0 (0.0%)
+
+Hindi:
+  Support: 95 (95.0%)
+  Oppose: 5 (5.0%)
+
+
+Summary:
+========
+
+Overall support across all languages: 98.1%
+
+Most supportive language: English (100.0%)
+Least supportive language: German (89.0%)
+
+Variance in support across languages: 12.58
+Standard deviation: 3.55
+
+Analysis Details:
+=================
+
+Model: GPT-4o-mini
+Date: 2025-03-07
+Number of languages: 12
+Samples per language: 100
+Total API calls: 1200
+CSV file: state-owned_enterprises_analysis_20250307_102326.csv
+Analysis ID: 20250307_102326
+GitHub: https://github.com/economicalstories/april

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State-owned Enterprises Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            color: #334155;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            width: 95%;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            padding: 35px;
+        }
+        .header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #4338ca;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4338ca, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header h2 {
+            color: #1e293b;
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .chart-container {
+            height: 550px;
+            margin: 30px 0 30px 0;
+            border-radius: 12px;
+            overflow: visible;
+            background-color: white;
+            width: 100%;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .stat-card {
+            flex: 1;
+            min-width: 180px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            text-align: center;
+            border-top: 4px solid #4338ca;
+            transition: transform 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card:nth-child(1) {
+            border-top-color: #6366f1;
+        }
+        .stat-card:nth-child(2) {
+            border-top-color: #10b981;
+        }
+        .stat-card:nth-child(3) {
+            border-top-color: #ef4444;
+        }
+        .stat-card:nth-child(4) {
+            border-top-color: #f59e0b;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .info-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        .info-section h3 {
+            color: #4338ca;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .info-section p {
+            color: #64748b;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .method-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .method-item {
+            flex: 1;
+            min-width: 150px;
+            background-color: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .method-item strong {
+            display: block;
+            color: #4338ca;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+        .method-item span {
+            color: #64748b;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .stats-row {
+                flex-direction: column;
+            }
+            .stat-card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>APRIL: All Policy Really Is Local</h1>
+            <h2>Support for State-owned Enterprises by Language</h2>
+            <p>Analysis of how GPT-4o-mini responds when prompted in different languages</p>
+        </div>
+
+        <div class="chart-container" id="chart-main"></div>
+        
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value">98.1%</div>
+                <div class="stat-label">Overall Support Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">100.0%</div>
+                <div class="stat-label">Highest Support (English)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">89.0%</div>
+                <div class="stat-label">Lowest Support (German)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3.55</div>
+                <div class="stat-label">Standard Deviation</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Key Insights</h3>
+            <p>This analysis reveals variation in how the AI model responds to State-owned Enterprises questions when prompted in different languages.</p>
+            <p>When prompted in English, the model expressed support at 100.0%, while in German, support was expressed at only 89.0%.</p>
+            <p>The standard deviation of 3.55 quantifies the dispersion in support rates across the tested languages, potentially highlighting linguistic and cultural factors influencing AI responses.</p>
+            
+            <h3 style="margin-top: 20px;">Methodology</h3>
+            <div class="method-specs">
+                <div class="method-item">
+                    <strong>Model</strong>
+                    <span>GPT-4o-mini</span>
+                </div>
+                <div class="method-item">
+                    <strong>Date</strong>
+                    <span>2025-03-07</span>
+                </div>
+                <div class="method-item">
+                    <strong>Languages</strong>
+                    <span>12</span>
+                </div>
+                <div class="method-item">
+                    <strong>Samples per language</strong>
+                    <span>100</span>
+                </div>
+                <div class="method-item">
+                    <strong>Total API calls</strong>
+                    <span>1200</span>
+                </div>
+                <div class="method-item">
+                    <strong>Analysis ID</strong>
+                    <span>20250307_102326</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>APRIL: All Policy Really Is Local | Analysis Date: 2025-03-07</p>
+            <p>GitHub: <a href="https://github.com/economicalstories/april" style="color: #4338ca; text-decoration: none;">https://github.com/economicalstories/april</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Embedded data from the analysis
+        const languageData = [
+            {language: "English", support: 100.0, oppose: 0.0},
+            {language: "Spanish", support: 100.0, oppose: 0.0},
+            {language: "French", support: 100.0, oppose: 0.0},
+            {language: "Italian", support: 100.0, oppose: 0.0},
+            {language: "Russian", support: 100.0, oppose: 0.0},
+            {language: "Japanese", support: 100.0, oppose: 0.0},
+            {language: "Korean", support: 100.0, oppose: 0.0},
+            {language: "Chinese", support: 100.0, oppose: 0.0},
+            {language: "Arabic", support: 100.0, oppose: 0.0},
+            {language: "Hindi", support: 95.0, oppose: 5.0},
+            {language: "Portuguese", support: 93.0, oppose: 7.0},
+            {language: "German", support: 89.0, oppose: 11.0}
+        ];
+        
+        // Example arguments for/against by language
+        const exampleArguments = {
+            "English": {
+                support: "SOEs can help ensure essential services are provided to the public and can stabilize the economy during downturns.",
+                oppose: "They may lead to inefficiencies and lack of competition, which can result in poor service delivery and financial losses for the government."
+            },
+            "Spanish": {
+                support: "Este tipo de empresas puede garantizar el acceso a bienes y servicios esenciales para la población, especialmente en sectores donde la inversión privada es insuficiente.",
+                oppose: "Las Empresas Estatales pueden generar ineficiencias económicas, ya que a veces carecen de la competencia que impulsa la innovación y la reducción de costos en el sector privado."
+            },
+            "French": {
+                support: "Cette politique garantit que des services essentiels sont accessibles à tous, indépendamment des fluctuations du marché.",
+                oppose: "Les entreprises publiques peuvent entraîner une inefficacité économique et un manque de concurrence, ce qui peut nuire à l'innovation."
+            },
+            "Italian": {
+                support: "Un motivo principale per sostenere questa politica è che le imprese statali possono garantire servizi essenziali a tutti i cittadini, indipendentemente dalla loro situazione economica.",
+                oppose: "Un motivo principale per opporsi a questa politica è che le imprese statali possono portare a inefficienze e sprechi a causa della mancanza di concorrenza nel mercato."
+            },
+            "Russian": {
+                support: "Основная причина поддержки этой политики заключается в том, что государственные предприятия могут обеспечивать доступ к важным услугам и товарам для населения, особенно в отраслях, где частный сектор не заинтересован в инвестициях.",
+                oppose: "Основная причина противостояния этой политике заключается в том, что государственные предприятия могут быть неэффективными и подвержены коррупции, что ведет к потере общественных средств."
+            },
+            "Japanese": {
+                support: "国有企業は公共サービスを提供し、地域経済の発展に寄与することができる。",
+                oppose: "国有企業は民間企業よりも効率が悪く、税金の無駄遣いになる可能性がある。"
+            },
+            "Korean": {
+                support: "국유기업은 공공 서비스의 접근성을 높이고 사회적 불평등을 줄이는 데 기여할 수 있습니다.",
+                oppose: "국유기업은 비효율성과 관료주의로 인해 자원의 낭비를 초래할 수 있습니다."
+            },
+            "Chinese": {
+                support: "国有企业可以确保关键行业的稳定与安全，保障国家经济的战略利益。",
+                oppose: "国有企业可能导致资源配置效率低下，抑制市场竞争，影响经济活力。"
+            },
+            "Arabic": {
+                support: "تساعد المؤسسات المملوكة للدولة في توفير خدمات أساسية بأسعار معقولة وتعزيز التنمية الاقتصادية.",
+                oppose: "قد تؤدي المؤسسات المملوكة للدولة إلى زيادة البيروقراطية وعدم الكفاءة بسبب نقص المنافسة."
+            },
+            "Hindi": {
+                support: "इस नीति का समर्थन करने का मुख्य कारण यह है कि यह सार्वजनिक सेवा को सुनिश्चित करती है और आर्थिक विकास में योगदान करती है।",
+                oppose: "इस नीति का विरोध करने का मुख्य कारण यह है कि राज्य के स्वामित्व वाले उद्यमों में अक्सर भ्रष्टाचार और प्रबंधन की कमी होती है, जिससे दक्षता में कमी आती है।"
+            },
+            "Portuguese": {
+                support: "Um dos principais motivos para apoiar as empresas estatais é que elas podem garantir o acesso a serviços essenciais e estratégicos à população, independentemente de interesses lucrativos.",
+                oppose: "Por outro lado, muitos argumentam que empresas estatais podem levar à ineficiência e à falta de competitividade no mercado, resultando em desperdício de recursos públicos."
+            },
+            "German": {
+                support: "Ein Hauptgrund für die Unterstützung staatlicher Unternehmen ist, dass sie die Bereitstellung grundlegender Dienstleistungen gewährleisten können, die für das Wohl der Gesellschaft unerlässlich sind.",
+                oppose: "Ein Hauptgrund für die Ablehnung staatlicher Unternehmen ist, dass sie ineffizient sein können und oft von politischen Interessen beeinflusst werden, was die Wettbewerbsfähigkeit untergräbt."
+            }
+        };
+
+        // Extract languages and support values for charting
+        const languages = languageData.map(d => d.language);
+        const supportValues = languageData.map(d => d.support);
+        const opposeValues = languageData.map(d => d.oppose);
+
+        // Create the stacked bar chart visualization
+        function createStackedBarChart() {
+            // Prepare the hover templates with proper formatting
+            const supportHoverTemplate = languages.map((lang, i) => {
+                return `<b>${lang}: ${supportValues[i].toFixed(1)}% Support</b><br>${exampleArguments[lang].support}`;
+            });
+            
+            const opposeHoverTemplate = languages.map((lang, i) => {
+                return `<b>${lang}: ${opposeValues[i].toFixed(1)}% Oppose</b><br>${exampleArguments[lang].oppose}`;
+            });
+            
+            const supportTrace = {
+                x: languages,
+                y: supportValues,
+                type: 'bar',
+                name: 'Support',
+                marker: {
+                    color: '#10b981',
+                    opacity: 1.0,
+                    line: {
+                        color: '#10b981',
+                        width: 0
+                    }
+                },
+                text: supportValues.map(val => val.toFixed(1) + '%'),
+                textposition: 'auto',
+                textfont: {
+                    color: 'white',
+                    size: 14,
+                    weight: 'bold'
+                },
+                hovertemplate: supportHoverTemplate,
+                cliponaxis: false
+            };
+
+            const opposeTrace = {
+                x: languages,
+                y: opposeValues,
+                type: 'bar',
+                name: 'Oppose',
+                marker: {
+                    color: '#ef4444',
+                    opacity: 1.0,
+                    line: {
+                        color: '#ef4444',
+                        width: 0
+                    }
+                },
+                text: opposeValues.map(val => val.toFixed(1) + '%'),
+                textposition: 'auto',
+                textfont: {
+                    color: 'white',
+                    size: 14,
+                    weight: 'bold'
+                },
+                hovertemplate: opposeHoverTemplate,
+                cliponaxis: false
+            };
+
+            const layout = {
+                barmode: 'stack',
+                bargap: 0.15,
+                bargroupgap: 0.05,
+                xaxis: {
+                    title: {
+                        text: '',
+                        font: {
+                            size: 14,
+                            color: '#64748b'
+                        }
+                    },
+                    tickangle: -30,
+                    tickfont: {
+                        color: '#64748b',
+                        size: 13
+                    },
+                    automargin: true
+                },
+                yaxis: {
+                    title: {
+                        text: 'Percentage (%)',
+                        font: {
+                            size: 14,
+                            color: '#64748b'
+                        }
+                    },
+                    range: [0, 105],
+                    tickfont: {
+                        color: '#64748b'
+                    },
+                    gridcolor: '#f1f5f9'
+                },
+                margin: {
+                    l: 60,
+                    r: 30,
+                    t: 5,
+                    b: 70
+                },
+                legend: {
+                    orientation: 'h',
+                    y: -0.10,
+                    x: 0.5,
+                    xanchor: 'center',
+                    yanchor: 'top',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 14,
+                        color: '#64748b'
+                    },
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                    bordercolor: '#e2e8f0',
+                    borderwidth: 1
+                },
+                autosize: true,
+                height: 520,
+                width: null,
+                plot_bgcolor: 'white',
+                paper_bgcolor: 'white',
+                hoverlabel: {
+                    bgcolor: 'white',
+                    bordercolor: '#e2e8f0',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 14,
+                        color: '#1e293b'
+                    },
+                    align: 'left'
+                },
+                hovermode: 'closest'
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: false,
+                toImageButtonOptions: {
+                    format: 'png',
+                    filename: 'state-owned_enterprises_support_by_language',
+                    height: 800,
+                    width: 1200,
+                    scale: 2
+                }
+            };
+
+            Plotly.newPlot('chart-main', [supportTrace, opposeTrace], layout, config);
+            
+            // Add resize listener to handle responsive resizing
+            window.addEventListener('resize', function() {
+                Plotly.Plots.resize(document.getElementById('chart-main'));
+            });
+        }
+
+        // Initialize chart when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            createStackedBarChart();
+        });
+    </script>
+</body>
+</html>
+    

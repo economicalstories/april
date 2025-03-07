@@ -15,7 +15,7 @@ APRIL extends this critical insight to generative artificial intelligence:
 Even when a model like GPT-4o is trained on multilingual data, the representations of concepts in different languages don't map identically. This has profound implications for global AI governance and policy deployment.
 
 <p align="center">
-  <img src="https://github.com/economicalstories/april/blob/main/universal_basic_income_visualization_20250302_220913.png" alt="APRIL visualization example" width="700"/>
+  <img src="https://github.com/economicalstories/april/blob/main/universal_basic_income_visualization_20250302_220913.png" alt="APRIL visualization example showing support/oppose rates across languages using Indigo/Amber color scheme" width="700"/>
 </p>
 
 ### Universal Basic Income (UBI) Examples
@@ -57,6 +57,32 @@ The summary file reveals significant variation in UBI support across languages:
 This demonstrates how the same policy question can yield dramatically different responses depending on the language used to prompt the model.
 
 APRIL tests whether large language models express consistent policy preferences across different languages
+
+## Visualization Web App
+
+APRIL includes a dedicated visualization web application that provides an interactive interface for exploring analysis results:
+
+```bash
+# Run the visualization web app
+python april_viz.py
+```
+
+The visualization app features:
+
+- **Interactive Charts**: Horizontal stacked bar charts showing support/oppose rates by language
+- **Theme Toggle**: Switch between light and dark modes with preferences saved
+- **Responsive Design**: Works seamlessly across desktop, tablet, and mobile devices
+- **Statistics Cards**: All data presented in consistent card format including:
+  - Model, date, samples per language, and analysis ID
+  - Overall support rate, highest/lowest support languages, and standard deviation
+- **Example Arguments**: Hover over bars to see example arguments for or against the policy in each language
+- **Key Insights**: Automatically generated insights based on the analysis data
+- **Clean Interface**: No control buttons, download options or unnecessary UI elements
+- **Modern UI**: Indigo and Amber color scheme with smooth animations
+
+Visit `http://127.0.0.1:5000/` in your browser after starting the app to access the visualization interface.
+
+For more details, see [README_viz.md](README_viz.md).
 
 ## Getting Started
 
@@ -109,20 +135,6 @@ The tool will guide you through the following steps:
    - CSV file with all raw responses
    - Text summary with statistics
    - Visualization showing support rates across languages
-
-
-### Interactive Visualization
-
-For a more dynamic exploration of the results, we've created an interactive visualization:
-
-- Interactive dashboard: `universal_basic_income_interactive_20250302_220913.html`
-
-This standalone HTML file contains an interactive stacked bar chart showing support and opposition percentages across all tested languages. Hover over any bar to see example arguments for or against the policy in that specific language.
-
-**How it was created:** The interactive visualization was developed by providing Claude 3.7 Sonnet with the raw data from our CSV analysis file and static PNG visualization. Through several iterative refinements, we transformed this into a standalone HTML file using Plotly.js for visualization, with all data embedded directly in the file. This allows for a rich interactive experience without requiring any external dependencies or server connections.
-
-To view the interactive visualization, simply open the HTML file in any modern web browser. The visualization works well on both desktop and mobile devices.
-
 
 ## Methodology
 
