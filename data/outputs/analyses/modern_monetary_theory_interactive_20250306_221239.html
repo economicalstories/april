@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Monetary Theory Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            color: #334155;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            width: 95%;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            padding: 35px;
+        }
+        .header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #4338ca;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4338ca, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header h2 {
+            color: #1e293b;
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .chart-container {
+            height: 550px;
+            margin: 30px 0 30px 0;
+            border-radius: 12px;
+            overflow: visible;
+            background-color: white;
+            width: 100%;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .stat-card {
+            flex: 1;
+            min-width: 180px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            text-align: center;
+            border-top: 4px solid #4338ca;
+            transition: transform 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card:nth-child(1) {
+            border-top-color: #6366f1;
+        }
+        .stat-card:nth-child(2) {
+            border-top-color: #10b981;
+        }
+        .stat-card:nth-child(3) {
+            border-top-color: #ef4444;
+        }
+        .stat-card:nth-child(4) {
+            border-top-color: #f59e0b;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .info-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        .info-section h3 {
+            color: #4338ca;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .info-section p {
+            color: #64748b;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .method-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .method-item {
+            flex: 1;
+            min-width: 150px;
+            background-color: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .method-item strong {
+            display: block;
+            color: #4338ca;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+        .method-item span {
+            color: #64748b;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .stats-row {
+                flex-direction: column;
+            }
+            .stat-card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>APRIL: All Policy Really Is Local</h1>
+            <h2>Support for Modern Monetary Theory by Language</h2>
+            <p>Analysis of how GPT-4o-mini responds when prompted in different languages</p>
+        </div>
+
+        <div class="chart-container" id="chart-main"></div>
+        
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value">76.8%</div>
+                <div class="stat-label">Overall Support Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">100.0%</div>
+                <div class="stat-label">Highest Support (French)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">9.0%</div>
+                <div class="stat-label">Lowest Support (German)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">30.66</div>
+                <div class="stat-label">Standard Deviation</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Key Insights</h3>
+            <p>This analysis reveals variation in how the AI model responds to Modern Monetary Theory questions when prompted in different languages.</p>
+            <p>When prompted in French, the model expressed support at 100.0%, while in German, support was expressed at only 9.0%.</p>
+            <p>The standard deviation of 30.66 quantifies the dispersion in support rates across the tested languages, potentially highlighting linguistic and cultural factors influencing AI responses.</p>
+            
+            <h3 style="margin-top: 20px;">Methodology</h3>
+            <div class="method-specs">
+                <div class="method-item">
+                    <strong>Model</strong>
+                    <span>GPT-4o-mini</span>
+                </div>
+                <div class="method-item">
+                    <strong>Date</strong>
+                    <span>2025-03-07</span>
+                </div>
+                <div class="method-item">
+                    <strong>Languages</strong>
+                    <span>12</span>
+                </div>
+                <div class="method-item">
+                    <strong>Samples per language</strong>
+                    <span>100</span>
+                </div>
+                <div class="method-item">
+                    <strong>Total API calls</strong>
+                    <span>1200</span>
+                </div>
+                <div class="method-item">
+                    <strong>Analysis ID</strong>
+                    <span>20250306_221239</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>APRIL: All Policy Really Is Local | Analysis Date: 2025-03-07</p>
+            <p>GitHub: <a href="https://github.com/economicalstories/april" style="color: #4338ca; text-decoration: none;">https://github.com/economicalstories/april</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Embedded data from the analysis
+        const languageData = [
+            {language: "French", support: 100.0, oppose: 0.0},
+            {language: "Japanese", support: 99.0, oppose: 1.0},
+            {language: "Spanish", support: 97.0, oppose: 3.0},
+            {language: "Chinese", support: 97.0, oppose: 3.0},
+            {language: "Portuguese", support: 96.0, oppose: 4.0},
+            {language: "Italian", support: 94.0, oppose: 3.0},
+            {language: "Korean", support: 89.0, oppose: 11.0},
+            {language: "Hindi", support: 89.0, oppose: 11.0},
+            {language: "Arabic", support: 69.0, oppose: 31.0},
+            {language: "Russian", support: 66.0, oppose: 34.0},
+            {language: "English", support: 16.0, oppose: 84.0},
+            {language: "German", support: 9.0, oppose: 91.0}
+        ];
+        
+        // Example arguments for/against by language
+        const exampleArguments = {
+            "French": {
+                support: "Cette politique permettrait de financer des programmes sociaux et d'infrastructure sans augmenter les impôts, ce qui pourrait stimuler la croissance économique.",
+                oppose: "Critiques soutiennent que cette approche pourrait entraîner une inflation incontrôlée si elle est mal gérée, affectant ainsi la stabilité économique à long terme."
+            },
+            "Japanese": {
+                support: "この政策は、政府が積極的に経済を刺激し、失業率を下げる手段として有効とされています。",
+                oppose: "しかし、無制限の貨幣発行はインフレを引き起こし、経済に悪影響を及ぼす可能性があります。"
+            },
+            "Spanish": {
+                support: "Este enfoque permite que los gobiernos inviertan en infraestructura y servicios sociales sin las restricciones de un presupuesto equilibrado, estimulando el crecimiento económico y el empleo.",
+                oppose: "Al financiar el gasto público sin restricciones, existe el riesgo de inflación y de devaluación de la moneda, lo que podría perjudicar la estabilidad económica a largo plazo."
+            },
+            "Chinese": {
+                support: "支持者认为，该理论可以帮助政府有效应对经济衰退，通过增加货币供应刺激经济增长和创造就业机会。",
+                oppose: "反对者认为，该理论可能导致通货膨胀加剧和财政不负责任，从而损害长期经济稳定。"
+            },
+            "Portuguese": {
+                support: "Apoiar a TMM pode permitir que os governos invistam em infraestrutura e serviços sociais, promovendo crescimento econômico e redução da desigualdade.",
+                oppose: "Por outro lado, a TMM pode levar a um aumento da inflação se os gastos públicos não forem cuidadosamente monitorados e controlados."
+            },
+            "Italian": {
+                support: "La principale ragione per sostenere questa politica è che può contribuire a ridurre la disoccupazione e stimolare la crescita economica attraverso un aumento della spesa pubblica.",
+                oppose: "La principale ragione per opporsi a questa politica è che potrebbe portare a un'inflazione incontrollata e a un debito pubblico insostenibile."
+            },
+            "Korean": {
+                support: "이 이론을 지지하는 주된 이유는 정부가 통화를 발행함으로써 실업을 줄이고 경제 성장을 촉진할 수 있다는 점입니다.",
+                oppose: "반대하는 주된 이유는 무제한적인 통화 발행이 인플레이션을 초래하고 경제의 지속 가능성을 해칠 수 있다는 점입니다."
+            },
+            "Hindi": {
+                support: "इस नीति का मुख्य समर्थन यह है कि यह सरकार को अधिक खर्च करने की अनुमति देती है, जिससे अर्थव्यवस्था को प्रेरित किया जा सकता है।",
+                oppose: "इस नीति का मुख्य विरोध यह है कि इससे मुद्रास्फीति बढ़ सकती है, जिससे दीर्घकालिक आर्थिक स्थिरता को खतरा हो सकता है।"
+            },
+            "Arabic": {
+                support: "الدعم لهذه النظرية يأتي من قدرتها على تعزيز النمو الاقتصادي من خلال زيادة الإنفاق الحكومي في فترات الركود.",
+                oppose: "المعارضة لهذه النظرية تستند إلى مخاوف من التضخم المفرط الناتج عن الإنفاق الحكومي المفرط وخلق النقود."
+            },
+            "Russian": {
+                support: "Основная причина поддерживать эту политику заключается в том, что она может способствовать экономическому росту и полной занятости без необходимости увеличивать налоги.",
+                oppose: "Основная причина противиться этой политике состоит в том, что она может привести к инфляции и обесцениванию валюты, если не будет должного контроля за денежной массой."
+            },
+            "English": {
+                support: "Supporters of MMT argue that it allows for increased public spending on social programs and infrastructure without the immediate concern of budget deficits.",
+                oppose: "Opponents contend that MMT could lead to excessive inflation and undermine the value of currency if not managed properly."
+            },
+            "German": {
+                support: "Ein Hauptgrund, diese Politik zu unterstützen, ist, dass sie potenziell zur Verringerung der Arbeitslosigkeit und zur Stärkung der Wirtschaft beitragen kann.",
+                oppose: "Ein Hauptgrund, diese Politik abzulehnen, ist die Sorge, dass eine unbegrenzte Geldschöpfung zu Inflation führen könnte, die die Kaufkraft der Bürger gefährdet."
+            }
+        };
+
+        // Extract languages and support values for charting
+        const languages = languageData.map(d => d.language);
+        const supportValues = languageData.map(d => d.support);
+        const opposeValues = languageData.map(d => d.oppose);
+
+        // Create the stacked bar chart visualization
+        function createStackedBarChart() {
+            // Prepare the hover templates with proper formatting
+            const supportHoverTemplate = languages.map((lang, i) => {
+                return `<b>${lang}: ${supportValues[i].toFixed(1)}% Support</b><br>${exampleArguments[lang].support}`;
+            });
+            
+            const opposeHoverTemplate = languages.map((lang, i) => {
+                return `<b>${lang}: ${opposeValues[i].toFixed(1)}% Oppose</b><br>${exampleArguments[lang].oppose}`;
+            });
+            
+            const supportTrace = {
+                x: languages,
+                y: supportValues,
+                type: 'bar',
+                name: 'Support',
+                marker: {
+                    color: '#10b981',
+                    opacity: 1.0,
+                    line: {
+                        color: '#10b981',
+                        width: 0
+                    }
+                },
+                text: supportValues.map(val => val.toFixed(1) + '%'),
+                textposition: 'auto',
+                textfont: {
+                    color: 'white',
+                    size: 14,
+                    weight: 'bold'
+                },
+                hovertemplate: supportHoverTemplate,
+                cliponaxis: false
+            };
+
+            const opposeTrace = {
+                x: languages,
+                y: opposeValues,
+                type: 'bar',
+                name: 'Oppose',
+                marker: {
+                    color: '#ef4444',
+                    opacity: 1.0,
+                    line: {
+                        color: '#ef4444',
+                        width: 0
+                    }
+                },
+                text: opposeValues.map(val => val.toFixed(1) + '%'),
+                textposition: 'auto',
+                textfont: {
+                    color: 'white',
+                    size: 14,
+                    weight: 'bold'
+                },
+                hovertemplate: opposeHoverTemplate,
+                cliponaxis: false
+            };
+
+            const layout = {
+                barmode: 'stack',
+                bargap: 0.15,
+                bargroupgap: 0.05,
+                xaxis: {
+                    title: {
+                        text: '',
+                        font: {
+                            size: 14,
+                            color: '#64748b'
+                        }
+                    },
+                    tickangle: -30,
+                    tickfont: {
+                        color: '#64748b',
+                        size: 13
+                    },
+                    automargin: true
+                },
+                yaxis: {
+                    title: {
+                        text: 'Percentage (%)',
+                        font: {
+                            size: 14,
+                            color: '#64748b'
+                        }
+                    },
+                    range: [0, 105],
+                    tickfont: {
+                        color: '#64748b'
+                    },
+                    gridcolor: '#f1f5f9'
+                },
+                margin: {
+                    l: 60,
+                    r: 30,
+                    t: 5,
+                    b: 70
+                },
+                legend: {
+                    orientation: 'h',
+                    y: -0.10,
+                    x: 0.5,
+                    xanchor: 'center',
+                    yanchor: 'top',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 14,
+                        color: '#64748b'
+                    },
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                    bordercolor: '#e2e8f0',
+                    borderwidth: 1
+                },
+                autosize: true,
+                height: 520,
+                width: null,
+                plot_bgcolor: 'white',
+                paper_bgcolor: 'white',
+                hoverlabel: {
+                    bgcolor: 'white',
+                    bordercolor: '#e2e8f0',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 14,
+                        color: '#1e293b'
+                    },
+                    align: 'left'
+                },
+                hovermode: 'closest'
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: false,
+                toImageButtonOptions: {
+                    format: 'png',
+                    filename: 'modern_monetary_theory_support_by_language',
+                    height: 800,
+                    width: 1200,
+                    scale: 2
+                }
+            };
+
+            Plotly.newPlot('chart-main', [supportTrace, opposeTrace], layout, config);
+            
+            // Add resize listener to handle responsive resizing
+            window.addEventListener('resize', function() {
+                Plotly.Plots.resize(document.getElementById('chart-main'));
+            });
+        }
+
+        // Initialize chart when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            createStackedBarChart();
+        });
+    </script>
+</body>
+</html>
+    

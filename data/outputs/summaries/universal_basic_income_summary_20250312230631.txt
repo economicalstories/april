@@ -1,0 +1,78 @@
+APRIL: All Policy Really Is Local
+Policy Analysis: Universal Basic Income
+Date: 2025-03-12 23:06:31
+Total samples: 1200
+
+Results by Language:
+====================
+
+English: Universal Basic Income
+  Support: 63 (63.0%)
+  Oppose: 37 (37.0%)
+
+Spanish: Universal Basic Income
+  Support: 28 (28.0%)
+  Oppose: 72 (72.0%)
+
+French: Universal Basic Income
+  Support: 65 (65.0%)
+  Oppose: 35 (35.0%)
+
+German: Universal Basic Income
+  Support: 27 (27.0%)
+  Oppose: 73 (73.0%)
+
+Italian: Universal Basic Income
+  Support: 48 (48.0%)
+  Oppose: 52 (52.0%)
+
+Portuguese: Universal Basic Income
+  Support: 62 (62.0%)
+  Oppose: 38 (38.0%)
+
+Russian: Universal Basic Income
+  Support: 51 (51.0%)
+  Oppose: 49 (49.0%)
+
+Japanese: Universal Basic Income
+  Support: 62 (62.0%)
+  Oppose: 38 (38.0%)
+
+Korean: Universal Basic Income
+  Support: 59 (59.0%)
+  Oppose: 41 (41.0%)
+
+Chinese: Universal Basic Income
+  Support: 30 (30.0%)
+  Oppose: 70 (70.0%)
+
+Arabic: Universal Basic Income
+  Support: 67 (67.0%)
+  Oppose: 33 (33.0%)
+
+Hindi: Universal Basic Income
+  Support: 40 (40.0%)
+  Oppose: 60 (60.0%)
+
+
+Summary:
+========
+
+Overall support across all languages: 50.2%
+
+Most supportive language: Arabic (67.0%)
+Least supportive language: German (27.0%)
+
+Variance in support across languages: 214.14
+Standard deviation: 14.63
+
+Analysis Details:
+=================
+
+Model: gpt-4o
+Date: 2025-03-12
+Number of languages: 12
+Samples per language: 100
+Total API calls: 1200
+Analysis ID: 20250312230631
+GitHub: https://github.com/economicalstories/april

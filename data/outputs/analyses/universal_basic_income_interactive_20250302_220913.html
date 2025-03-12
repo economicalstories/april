@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Basic Income Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background-color: #f8fafc;
+            color: #334155;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            width: 95%;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            padding: 35px;
+        }
+        .header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #4338ca;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4338ca, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header h2 {
+            color: #1e293b;
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .chart-container {
+            height: 550px;
+            margin: 30px 0 30px 0;
+            border-radius: 12px;
+            overflow: visible;
+            background-color: white;
+            width: 100%;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .stat-card {
+            flex: 1;
+            min-width: 180px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            text-align: center;
+            border-top: 4px solid #4338ca;
+            transition: transform 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card:nth-child(1) {
+            border-top-color: #6366f1;
+        }
+        .stat-card:nth-child(2) {
+            border-top-color: #10b981;
+        }
+        .stat-card:nth-child(3) {
+            border-top-color: #ef4444;
+        }
+        .stat-card:nth-child(4) {
+            border-top-color: #f59e0b;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .info-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        .info-section h3 {
+            color: #4338ca;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .info-section p {
+            color: #64748b;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .method-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .method-item {
+            flex: 1;
+            min-width: 150px;
+            background-color: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .method-item strong {
+            display: block;
+            color: #4338ca;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+        .method-item span {
+            color: #64748b;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .stats-row {
+                flex-direction: column;
+            }
+            .stat-card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>APRIL: All Policy Really Is Local</h1>
+            <h2>Support for Universal Basic Income by Language</h2>
+            <p>Analysis of how GPT-4o responds when prompted in different languages</p>
+        </div>
+
+        <div class="chart-container" id="chart-main"></div>
+        
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value">37.2%</div>
+                <div class="stat-label">Overall Support Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">64.0%</div>
+                <div class="stat-label">Highest Support (Arabic)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">18.0%</div>
+                <div class="stat-label">Lowest Support (Hindi)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12.85</div>
+                <div class="stat-label">Standard Deviation</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Key Insights</h3>
+            <p>This analysis reveals variation in how the AI model responds to Universal Basic Income questions when prompted in different languages.</p>
+            <p>When prompted in Arabic, the model expressed support at 64.0%, while in Hindi, support was expressed at only 18.0%.</p>
+            <p>The standard deviation of 12.85 quantifies the dispersion in support rates across the tested languages, potentially highlighting linguistic and cultural factors influencing AI responses.</p>
+            
+            <h3 style="margin-top: 20px;">Methodology</h3>
+            <div class="method-specs">
+                <div class="method-item">
+                    <strong>Model</strong>
+                    <span>GPT-4o</span>
+                </div>
+                <div class="method-item">
+                    <strong>Date</strong>
+                    <span>2025-03-07</span>
+                </div>
+                <div class="method-item">
+                    <strong>Languages</strong>
+                    <span>12</span>
+                </div>
+                <div class="method-item">
+                    <strong>Samples per language</strong>
+                    <span>100</span>
+                </div>
+                <div class="method-item">
+                    <strong>Total API calls</strong>
+                    <span>1200</span>
+                </div>
+                <div class="method-item">
+                    <strong>Analysis ID</strong>
+                    <span>20250302_220913</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>APRIL: All Policy Really Is Local | Analysis Date: 2025-03-07</p>
+            <p>GitHub: <a href="https://github.com/economicalstories/april" style="color: #4338ca; text-decoration: none;">https://github.com/economicalstories/april</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Embedded data from the analysis
+        const languageData = [
+            {language: "Arabic", support: 64.0, oppose: 36.0},
+            {language: "French", support: 56.0, oppose: 44.0},
+            {language: "Portuguese", support: 44.0, oppose: 56.0},
+            {language: "Chinese", support: 44.0, oppose: 56.0},
+            {language: "Italian", support: 39.0, oppose: 61.0},
+            {language: "English", support: 38.0, oppose: 62.0},
+            {language: "Korean", support: 34.0, oppose: 66.0},
+            {language: "Russian", support: 30.0, oppose: 70.0},
+            {language: "Japanese", support: 30.0, oppose: 70.0},
+            {language: "Spanish", support: 29.0, oppose: 71.0},
+            {language: "German", support: 21.0, oppose: 79.0},
+            {language: "Hindi", support: 18.0, oppose: 82.0}
+        ];
+        
+        // Example arguments for/against by language
+        const exampleArguments = {
+            "Arabic": {
+                support: "السبب الرئيسي لدعم هذه السياسة هو أنها قد تقلل من الفقر وتعزز الأمان المالي للأفراد.",
+                oppose: "السبب الرئيسي لمعارضة هذه السياسة هو التكلفة العالية التي قد تتطلبها على ميزانية الحكومة وقد تؤدي إلى زيادة الضرائب."
+            },
+            "French": {
+                support: "Cette politique peut réduire la pauvreté et offrir une sécurité financière de base à tous les individus, améliorant ainsi la qualité de vie globale.",
+                oppose: "Le financement d'un Revenu de Base Universel peut entraîner une augmentation significative des impôts ou une réduction des dépenses publiques dans d'autres domaines essentiels."
+            },
+            "Portuguese": {
+                support: "Esta política pode reduzir a pobreza e simplificar o sistema de bem-estar social, promovendo igualdade econômica e segurança financeira.",
+                oppose: "O alto custo de implementação pode sobrecarregar as finanças públicas e diminuir o incentivo ao trabalho para alguns indivíduos."
+            },
+            "Chinese": {
+                support: "支持该政策的主要理由是它可以减少贫困，提高人民的生活质量，并简化社会福利体系。",
+                oppose: "反对该政策的主要理由是其高成本可能导致财政不可持续，并减少人们工作的动机。"
+            },
+            "Italian": {
+                support: "Sostenere il Reddito di Base Universale potrebbe ridurre la povertà e fornire una rete di sicurezza finanziaria a tutti, stimolando al contempo l'economia attraverso una maggiore capacità di spesa dei cittadini.",
+                oppose: "Implementare il Reddito di Base Universale richiede risorse finanziarie significative, che potrebbero portare a un aumento delle tasse o al taglio di altri servizi pubblici e benefici sociali."
+            },
+            "English": {
+                support: "UBI can reduce poverty and economic inequality by providing a financial safety net that ensures a basic standard of living for everyone.",
+                oppose: "UBI could be prohibitively expensive for governments to maintain, potentially leading to increased taxes or cuts in other essential services."
+            },
+            "Korean": {
+                support: "이 정책은 빈곤 감소와 경제적 불평등 해소에 기여할 수 있습니다.",
+                oppose: "재정적 부담이 커져 국가의 다른 중요한 복지 서비스가 약화될 수 있습니다."
+            },
+            "Russian": {
+                support: "Основной аргумент в поддержку УБД заключается в его потенциале для снижения нищеты и обеспечения базового уровня жизни для всех граждан.",
+                oppose: "Основной аргумент против УБД заключается в его высокой стоимости, которая может привести к значительным налоговым увеличениям или сокращению других социальных программ."
+            },
+            "Japanese": {
+                support: "UBIは貧困を削減し、経済的不平等を緩和する可能性があります。",
+                oppose: "UBIは財政的に持続不可能であり、労働意欲を低下させる可能性があります。"
+            },
+            "Spanish": {
+                support: "El principal argumento a favor del Ingreso Básico Universal es que puede reducir la pobreza y la desigualdad al proporcionar seguridad financiera básica a todos los ciudadanos.",
+                oppose: "El principal argumento en contra es que financiar un programa así podría ser muy costoso y desafiar la sostenibilidad fiscal del país."
+            },
+            "German": {
+                support: "Ein Hauptargument für das BGE ist, dass es Armut verringern und den sozialen Zusammenhalt stärken kann, indem es allen Bürgern ein finanzielles Sicherheitsnetz bietet.",
+                oppose: "Kritiker argumentieren, dass das BGE wirtschaftlich nicht nachhaltig ist, da die Finanzierung hohe Steuern erfordern würde und es möglicherweise die Arbeitsbereitschaft verringert."
+            },
+            "Hindi": {
+                support: "इस नीति से गरीबी घटेगी और आर्थिक असमानता में कमी आएगी क्योंकि यह सभी नागरिकों के लिए एक न्यूनतम आय सुनिश्चित करती है।",
+                oppose: "इस नीति को लागू करने के लिए आवश्यक धनराशि जुटाना सरकार के लिए बेहद चुनौतीपूर्ण हो सकता है, जिससे बजट असंतुलन हो सकता है।"
+            }
+        };
+
+        // Extract languages and support values for charting
+        const languages = languageData.map(d => d.language);
+        const supportValues = languageData.map(d => d.support);
+        const opposeValues = languageData.map(d => d.oppose);
+
+        // Create the stacked bar chart visualization
+        function createStackedBarChart() {
+            // Prepare the hover templates with proper formatting
+            const supportHoverTemplate = languages.map((lang, i) => {
+                return `<b>${lang}: ${supportValues[i].toFixed(1)}% Support</b><br>${exampleArguments[lang].support}`;
+            });
+            
+            const opposeHoverTemplate = languages.map((lang, i) => {
+                return `<b>${lang}: ${opposeValues[i].toFixed(1)}% Oppose</b><br>${exampleArguments[lang].oppose}`;
+            });
+            
+            const supportTrace = {
+                x: languages,
+                y: supportValues,
+                type: 'bar',
+                name: 'Support',
+                marker: {
+                    color: '#10b981',
+                    opacity: 1.0,
+                    line: {
+                        color: '#10b981',
+                        width: 0
+                    }
+                },
+                text: supportValues.map(val => val.toFixed(1) + '%'),
+                textposition: 'auto',
+                textfont: {
+                    color: 'white',
+                    size: 14,
+                    weight: 'bold'
+                },
+                hovertemplate: supportHoverTemplate,
+                cliponaxis: false
+            };
+
+            const opposeTrace = {
+                x: languages,
+                y: opposeValues,
+                type: 'bar',
+                name: 'Oppose',
+                marker: {
+                    color: '#ef4444',
+                    opacity: 1.0,
+                    line: {
+                        color: '#ef4444',
+                        width: 0
+                    }
+                },
+                text: opposeValues.map(val => val.toFixed(1) + '%'),
+                textposition: 'auto',
+                textfont: {
+                    color: 'white',
+                    size: 14,
+                    weight: 'bold'
+                },
+                hovertemplate: opposeHoverTemplate,
+                cliponaxis: false
+            };
+
+            const layout = {
+                barmode: 'stack',
+                bargap: 0.15,
+                bargroupgap: 0.05,
+                xaxis: {
+                    title: {
+                        text: '',
+                        font: {
+                            size: 14,
+                            color: '#64748b'
+                        }
+                    },
+                    tickangle: -30,
+                    tickfont: {
+                        color: '#64748b',
+                        size: 13
+                    },
+                    automargin: true
+                },
+                yaxis: {
+                    title: {
+                        text: 'Percentage (%)',
+                        font: {
+                            size: 14,
+                            color: '#64748b'
+                        }
+                    },
+                    range: [0, 105],
+                    tickfont: {
+                        color: '#64748b'
+                    },
+                    gridcolor: '#f1f5f9'
+                },
+                margin: {
+                    l: 60,
+                    r: 30,
+                    t: 5,
+                    b: 70
+                },
+                legend: {
+                    orientation: 'h',
+                    y: -0.10,
+                    x: 0.5,
+                    xanchor: 'center',
+                    yanchor: 'top',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 14,
+                        color: '#64748b'
+                    },
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                    bordercolor: '#e2e8f0',
+                    borderwidth: 1
+                },
+                autosize: true,
+                height: 520,
+                width: null,
+                plot_bgcolor: 'white',
+                paper_bgcolor: 'white',
+                hoverlabel: {
+                    bgcolor: 'white',
+                    bordercolor: '#e2e8f0',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 14,
+                        color: '#1e293b'
+                    },
+                    align: 'left'
+                },
+                hovermode: 'closest'
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: false,
+                toImageButtonOptions: {
+                    format: 'png',
+                    filename: 'universal_basic_income_support_by_language',
+                    height: 800,
+                    width: 1200,
+                    scale: 2
+                }
+            };
+
+            Plotly.newPlot('chart-main', [supportTrace, opposeTrace], layout, config);
+            
+            // Add resize listener to handle responsive resizing
+            window.addEventListener('resize', function() {
+                Plotly.Plots.resize(document.getElementById('chart-main'));
+            });
+        }
+
+        // Initialize chart when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            createStackedBarChart();
+        });
+    </script>
+</body>
+</html>
+    
